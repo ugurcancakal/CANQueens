@@ -18,11 +18,21 @@
 #include <iostream>
 
 class CA {
+
+private:
+    bool ignition;
+    int ID;
+
 public:
     CA();
     ~CA();
     std::string toString();
     //CUDA_CALLABLE_MEMBER std::string toString();
+    bool getIgnition();
+    int getID();
+
+
+
 };
 
 #endif // CA_H

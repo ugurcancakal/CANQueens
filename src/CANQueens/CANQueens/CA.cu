@@ -18,3 +18,11 @@ CA::~CA() {
 std::string CA::toString() {
     return "CA";
 }
+
+bool CA::getIgnition() {
+	return ignition;
+}
+
+int CA::getID() {
+    return ID;
+}

@@ -3,6 +3,12 @@
 #include <iostream>
 
 #include "CA.cuh"
+#include "FLIF.cuh"
+#include "Board.cuh"
+#include "Memory.cuh"
+#include "Explore.cuh"
+#include "Value.cuh"
+#include "Chromosome.cuh"
 
 int main(int argc, char** argv) {
 	/* Functions here are implemented to save the space in the main function.
@@ -10,8 +16,28 @@ int main(int argc, char** argv) {
 	 */
 
 	std::cout << "Welcome to CANQueens Project" << std::endl;
+
 	CA myCA;
 	std::cout << myCA.toString() << std::endl;
+
+	FLIF myFLIF;
+	std::cout << myFLIF.toString() << std::endl;
+
+	Board myBoard;
+	std::cout << myBoard.toString() << std::endl;
+
+	Memory myMemory;
+	std::cout << myMemory.toString() << std::endl;
+
+	Value myValue;
+	std::cout << myValue.toString() << std::endl;
+
+	Explore myExplore;
+	std::cout << myExplore.toString() << std::endl;
+
+	Chromosome myChromosome;
+	std::cout << myChromosome.toString() << std::endl;
+
 	return 0;
 }
 

@@ -77,11 +77,23 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CudaCompile Include="Board.cu" />
     <CudaCompile Include="CA.cu" />
+    <CudaCompile Include="Chromosome.cu" />
+    <CudaCompile Include="Explore.cu" />
+    <CudaCompile Include="FLIF.cu" />
     <CudaCompile Include="main.cu" />
+    <CudaCompile Include="Memory.cu" />
+    <CudaCompile Include="Value.cu" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Board.cuh" />
     <ClInclude Include="CA.cuh" />
+    <ClInclude Include="Chromosome.cuh" />
+    <ClInclude Include="Explore.cuh" />
+    <ClInclude Include="FLIF.cuh" />
+    <ClInclude Include="Memory.cuh" />
+    <ClInclude Include="Value.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
