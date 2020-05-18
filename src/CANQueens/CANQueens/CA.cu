@@ -8,11 +8,13 @@
 #include "CA.cuh"
 
 CA::CA() {
-    std::cout << "CA constructed" << std::endl;
+    ignition = (0 == (rand() % 2));
+    ID = rand()%1000000;
+    //std::cout << "CA constructed" << std::endl;
 }
 
 CA::~CA() {
-    std::cout << "CA destructed" << std::endl;
+    //std::cout << "CA destructed" << std::endl;
 }
 
 std::string CA::toString() {

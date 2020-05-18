@@ -5,97 +5,103 @@
  * ugurcan.cakal@gmail.com
  */
 
+
+// guzel calismiyor
 #include "Board.cuh"
 
-void Board::initiateBoard() {
-    if (!initiatedB) {
-        board = new CA * [row];
-        for (int i = 0; i < row; ++i) {
-            board[i] = new CA[col];
-        }
-        initiatedB = true;
-    }
-    else {
-        std::cout << "Board has already been initiated!" << std::endl;
-    }
+Board::Board(int n) {
+    row = n; // n
+    col = n>1? ceil(log2(n)) : 1; // log2n
+    board = initiateBoard(row, col);
+    chromosome = initiateCh(row);
+    boardToCh();
+    std::cout << "row: " << row << " col: " << col << std::endl;
 }
 
-void Board::deleteBoard() {
-    if (initiatedB) {
-        for (int i = 0; i < row; ++i) {
-            delete[] board[row];
-        }
-        delete[] board;
-        initiatedB = false;
-    }
-    else {
-        std::cout << "Board has not been created yet!" << std::endl;
-    }
+Board::~Board() {
+    deleteBoard(board, row, col);
+    std::cout << "Board destructed" << std::endl;
 }
 
-void Board::initiateCh() {
-    if (!initiatedCh) {
-        chromosome = new int[row];
-        initiatedCh = true;
+CA** Board::initiateBoard(int row, int col) {
+    CA** board;
+    board = new CA * [row];
+    for (int i = 0; i < row; ++i) {
+        board[i] = new CA[col];
     }
-    else {
-        std::cout << "Chromosome has already been initiated!" << std::endl;
-    }
+    return board;
 }
 
-void Board::deleteCh() {
-    if (initiatedCh) {
-        delete[] chromosome;
-        initiatedCh = false;
+void Board::deleteBoard(CA** board, int row, int col) {
+    for (int i = 0; i < row; ++i) {
+        delete[] board[i];
     }
-    else {
-        std::cout << "Chromosome has not been created yet!" << std::endl;
-    }
+    delete[] board;
+}
+
+int* Board::initiateCh(int row) {
+    int* chromosome = new int[row];
+    return chromosome;
+}
+
+void Board::deleteCh(int* chromosome) {
+    delete[] chromosome;
 }
 
 void Board::boardToCh() {
     int temp = 0;
-    if (initiatedB && initiatedCh) {
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < col; j++) {
-                board[row][col];
-                // Burade tempe kaydetme islemi
-            }
-            chromosome[row] = temp;
-            temp = 0;
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            if (board[i][j].getIgnition())
+                temp+=  pow(2, (col - j -1));
+            // Burade tempe kaydetme islemi
         }
+        chromosome[row] = temp;
+        std::cout << temp << std::endl;
+        temp = 0;
     }
-    else if (!initiatedB){
-        std::cout << "Board has not been created yet!" << std::endl;
-    }
-    else if (!initiatedCh) {
-        std::cout << "Chromosome has not been created yet!" << std::endl;
-    }
-    
 }
 
 int* Board::getChromosome() {
     return chromosome;
 }
 
-Board::Board() {
-    std::cout << "Board constructed" << std::endl;
-}
-
-Board::~Board() {
-    std::cout << "Board destructed" << std::endl;
-}
-
 std::string Board::toString() {
-    return "Board";
-    if (initiatedB) {
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < col; j++) {
-                board[row][col];
-            }
+    std::string temp = "\n";
+    for (int i = 0; i < row; i++) {
+        temp += "|\t";
+        for (int j = 0; j < col; j++) {
+            if (board[i][j].getIgnition())
+                temp += "*\t";
+            else
+                temp += "\t";
         }
+        temp += "|\n";
     }
-    else {
-        std::cout << "Board has not been created yet!" << std::endl;
+    return temp;
+}
+
+std::string Board::toStringCh() {
+    std::string temp = "\n";
+    for (int i = 0; i < row; i++) {
+        temp += "|\t" + std::to_string(chromosome[i]) +"\t|\n";
     }
+    return temp;
+}
+
+std::string Board::toStringEx() {
+
+    // call board to ch first
+    std::string temp = "\n";
+    for (int i = 0; i < row; i++) {
+        temp += "|\t";
+        for (int j = 0; j < row; j++) {
+            if (chromosome[i] == j)
+                temp += "*\t";
+            else
+                temp += "\t";
+        }
+        temp += "|\n";
+    }
+    return temp;
 }

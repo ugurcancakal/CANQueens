@@ -1,6 +1,8 @@
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include <iostream>
+#include <ctime>
+#include <cstdlib>
 
 #include "CA.cuh"
 #include "FLIF.cuh"
@@ -14,29 +16,40 @@ int main(int argc, char** argv) {
 	/* Functions here are implemented to save the space in the main function.
 	 * In order to play with the parameters, please go to the related funciton definition.
 	 */
+	srand(time(0));
 
 	std::cout << "Welcome to CANQueens Project" << std::endl;
 
-	CA myCA;
-	std::cout << myCA.toString() << std::endl;
+	//for (int i = 0; i < 50; i++) {
+	//	CA myCA;
+	//	std::cout << myCA.getID() << std::endl;
+	//	std::cout << myCA.getIgnition() << std::endl;
+	//	std::cout << myCA.toString() << std::endl;
+	//}
 
-	FLIF myFLIF;
-	std::cout << myFLIF.toString() << std::endl;
 
-	Board myBoard;
+	//FLIF myFLIF;
+	//std::cout << myFLIF.toString() << std::endl;
+
+	int n = 8;
+	Board myBoard(n);
+	//CA** board = myBoard.getBoard();
+	//std::cout << board[2][3].getID() << std::endl;
 	std::cout << myBoard.toString() << std::endl;
+	std::cout << myBoard.toStringCh() << std::endl;
+	std::cout << myBoard.toStringEx() << std::endl;
 
-	Memory myMemory;
-	std::cout << myMemory.toString() << std::endl;
+	//Memory myMemory;
+	//std::cout << myMemory.toString() << std::endl;
 
-	Value myValue;
-	std::cout << myValue.toString() << std::endl;
+	//Value myValue;
+	//std::cout << myValue.toString() << std::endl;
 
-	Explore myExplore;
-	std::cout << myExplore.toString() << std::endl;
+	//Explore myExplore;
+	//std::cout << myExplore.toString() << std::endl;
 
-	Chromosome myChromosome;
-	std::cout << myChromosome.toString() << std::endl;
+	//Chromosome myChromosome;
+	//std::cout << myChromosome.toString() << std::endl;
 
 	return 0;
 }

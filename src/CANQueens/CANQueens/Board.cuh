@@ -16,32 +16,32 @@
 
 #include <string>
 #include <iostream>
+#include <math.h>
 
 #include "CA.cuh"
 
 class Board {
 private:
     CA** board;
-    bool initiatedB;
-    
     int* chromosome;
-    bool initiatedCh;
 
     int row; // n
     int col; // log2n
     
-    void initiateBoard();
-    void deleteBoard();
+    CA** initiateBoard(int row, int col);
+    void deleteBoard(CA** board, int row, int col);
 
-    void initiateCh();
-    void deleteCh();
+    int* initiateCh(int row);
+    void deleteCh(int* chromosome);
 
     void boardToCh();
 
 public:
-    Board();
+    Board(int n);
     ~Board();
     std::string toString();
+    std::string toStringCh();
+    std::string toStringEx();
     int* getChromosome();
     //CUDA_CALLABLE_MEMBER std::string toString();
 };
