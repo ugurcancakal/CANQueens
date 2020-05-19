@@ -34,14 +34,17 @@ private:
     int* initiateCh(int row);
     void deleteCh(int* chromosome);
 
+    std::string fullBoard();
+    std::string compressedBoard();
+    std::string chromosomeDecimal();
+
     void boardToCh();
 
 public:
+    enum class PrintType { full, comp, chrom };
     Board(int n);
     ~Board();
-    std::string toString();
-    std::string toStringCh();
-    std::string toStringEx();
+    std::string toString(PrintType type);
     int* getChromosome();
     //CUDA_CALLABLE_MEMBER std::string toString();
 };

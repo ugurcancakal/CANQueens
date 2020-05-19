@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
 	 */
 	srand(time(0));
 
-	std::cout << "Welcome to CANQueens Project" << std::endl;
+	//std::cout << "Welcome to CANQueens Project" << std::endl;
 
 	//for (int i = 0; i < 50; i++) {
 	//	CA myCA;
@@ -35,9 +35,9 @@ int main(int argc, char** argv) {
 	Board myBoard(n);
 	//CA** board = myBoard.getBoard();
 	//std::cout << board[2][3].getID() << std::endl;
-	std::cout << myBoard.toString() << std::endl;
-	std::cout << myBoard.toStringCh() << std::endl;
-	std::cout << myBoard.toStringEx() << std::endl;
+	std::cout << myBoard.toString(Board::PrintType::chrom) << std::endl;
+	std::cout << myBoard.toString(Board::PrintType::comp) << std::endl;
+	std::cout << myBoard.toString(Board::PrintType::full) << std::endl;
 
 	//Memory myMemory;
 	//std::cout << myMemory.toString() << std::endl;

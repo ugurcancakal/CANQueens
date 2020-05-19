@@ -7,10 +7,12 @@
 
 #include "CA.cuh"
 
+int CA::nextID = 0;
+
 CA::CA() {
     ignition = (0 == (rand() % 2));
-    ID = rand()%1000000;
-    //std::cout << "CA constructed" << std::endl;
+    ID = ++nextID;
+    //std::cout << "CA constructed with ID: " << ID << std::endl;
 }
 
 CA::~CA() {

@@ -23,6 +23,9 @@ private:
     bool ignition;
     int ID;
 
+protected:
+    static int nextID;
+
 public:
     CA();
     ~CA();

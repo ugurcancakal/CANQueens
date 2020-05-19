@@ -5,8 +5,6 @@
  * ugurcan.cakal@gmail.com
  */
 
-
-// guzel calismiyor
 #include "Board.cuh"
 
 Board::Board(int n) {
@@ -15,7 +13,7 @@ Board::Board(int n) {
     board = initiateBoard(row, col);
     chromosome = initiateCh(row);
     boardToCh();
-    std::cout << "row: " << row << " col: " << col << std::endl;
+    //std::cout << "row: " << row << " col: " << col << std::endl;
 }
 
 Board::~Board() {
@@ -54,10 +52,9 @@ void Board::boardToCh() {
         for (int j = 0; j < col; j++) {
             if (board[i][j].getIgnition())
                 temp+=  pow(2, (col - j -1));
-            // Burade tempe kaydetme islemi
         }
-        chromosome[row] = temp;
-        std::cout << temp << std::endl;
+        chromosome[i] = temp;
+        //std::cout << temp << std::endl;
         temp = 0;
     }
 }
@@ -66,10 +63,35 @@ int* Board::getChromosome() {
     return chromosome;
 }
 
-std::string Board::toString() {
+std::string Board::toString(PrintType type) {
+
+    switch (type)
+    {
+    case PrintType::full:
+        return fullBoard();
+        break;
+    case PrintType::comp:
+        return compressedBoard();
+        break;
+    case PrintType::chrom:
+        return chromosomeDecimal();
+        break;
+    default:
+        return compressedBoard();
+        break;
+    }
+}
+
+std::string Board::compressedBoard() {
     std::string temp = "\n";
+    temp += "  \t";
+    for (int i = 0; i < col; i++) {
+        temp += std::to_string(i) + "\t";
+    }
+    temp += " \n";
+    temp += " " + std::string(8 * (col + 1), '-') + "\n";
     for (int i = 0; i < row; i++) {
-        temp += "|\t";
+        temp += std::to_string(i) + "|\t";
         for (int j = 0; j < col; j++) {
             if (board[i][j].getIgnition())
                 temp += "*\t";
@@ -77,24 +99,31 @@ std::string Board::toString() {
                 temp += "\t";
         }
         temp += "|\n";
+        temp += " " + std::string(8 * (col + 1), '-') + "\n";
     }
     return temp;
 }
 
-std::string Board::toStringCh() {
+std::string Board::chromosomeDecimal() {
     std::string temp = "\n";
     for (int i = 0; i < row; i++) {
-        temp += "|\t" + std::to_string(chromosome[i]) +"\t|\n";
+        temp += std::to_string(i) + "| " + std::to_string(chromosome[i]) +" |\n";
     }
     return temp;
 }
 
-std::string Board::toStringEx() {
+std::string Board::fullBoard() {
 
     // call board to ch first
     std::string temp = "\n";
+    temp += "  \t";
     for (int i = 0; i < row; i++) {
-        temp += "|\t";
+        temp += std::to_string(i) + "\t";
+    }
+    temp += " \n";
+    temp += " " + std::string(8*(row+1), '-') + "\n";
+    for (int i = 0; i < row; i++) {
+        temp += std::to_string(i) + "|\t";
         for (int j = 0; j < row; j++) {
             if (chromosome[i] == j)
                 temp += "*\t";
@@ -102,6 +131,7 @@ std::string Board::toStringEx() {
                 temp += "\t";
         }
         temp += "|\n";
+        temp += " " + std::string(8 * (row + 1), '-') + "\n";
     }
     return temp;
 }
