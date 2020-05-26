@@ -10,8 +10,8 @@
 Board::Board(int n) {
     row = n; // n
     col = n>1? ceil(log2(n)) : 1; // log2n
-    board = initiateBoard(row, col);
-    chromosome = initiateCh(row);
+    board = initiateBoard(n, col);
+    chromosome = initiateCh(n);
     boardToCh();
     //std::cout << "row: " << row << " col: " << col << std::endl;
 }

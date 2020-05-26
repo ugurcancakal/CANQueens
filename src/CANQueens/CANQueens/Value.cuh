@@ -18,10 +18,15 @@
 #include <iostream>
 
 class Value {
+private:
+    int row;
+    int fitness(int* chromosome);
 public:
-    Value();
+    Value(int n);
     ~Value();
     std::string toString();
+    void update(int* chromosome);
+    
     //CUDA_CALLABLE_MEMBER std::string toString();
 };
 

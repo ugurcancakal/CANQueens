@@ -31,19 +31,34 @@ int main(int argc, char** argv) {
 	//FLIF myFLIF;
 	//std::cout << myFLIF.toString() << std::endl;
 
-	int n = 8;
+	int n = 5;
+	int* chromosome;
 	Board myBoard(n);
 	//CA** board = myBoard.getBoard();
 	//std::cout << board[2][3].getID() << std::endl;
 	std::cout << myBoard.toString(Board::PrintType::chrom) << std::endl;
 	std::cout << myBoard.toString(Board::PrintType::comp) << std::endl;
 	std::cout << myBoard.toString(Board::PrintType::full) << std::endl;
+	
+	// 202605 ONEMLI
+	// 3 bit olursa ama n = 8 olmazsa yasakli bitleri belirlemek gerek
+	// Modulo falan olabilir
+	chromosome = myBoard.getChromosome();
+	std::string temp = "\n";
+	for (int i = 0; i < n; i++) {
+		temp += std::to_string(i) + "| " + std::to_string(chromosome[i]) + " |\n";
+	}
+	std::cout << temp << std::endl;
+
+
 
 	//Memory myMemory;
 	//std::cout << myMemory.toString() << std::endl;
 
-	//Value myValue;
-	//std::cout << myValue.toString() << std::endl;
+	Value myValue(n);
+	std::cout << myValue.toString() << std::endl;
+
+	myValue.update(chromosome);
 
 	//Explore myExplore;
 	//std::cout << myExplore.toString() << std::endl;
