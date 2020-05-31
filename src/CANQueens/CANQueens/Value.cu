@@ -26,12 +26,28 @@ void Value::update(int* chromosome) {
 
 int Value::fitness(int* chromosome) {
     // KONTROL ET
-    int collision = 0;
+    /*int collision = 0;
     int d;
     for (int i = row; i >= 0; i--) {
         for (int k = i - 1; k >= 0; k--) {
             d = abs(chromosome[i] - chromosome[k]);
             if ((d == 0) || (d == i - k)) {
+                collision++;
+            }
+        }
+    }
+    return collision;*/
+    int collision = 0;
+    int d;
+    for (int i = 0; i < row; i++) {
+        //std::cout << "i: " << i << std::endl;
+        if (chromosome[i] >= row) {
+            collision += 666;
+        }
+        for (int k = i+1; k < row; k++) {
+            //std::cout << "k: " << k << std::endl;
+            d = abs(chromosome[k] - chromosome[i]);
+            if ((d == 0) || (d == k-i)) {
                 collision++;
             }
         }

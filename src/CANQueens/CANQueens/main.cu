@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
 	 */
 	srand(time(0));
 
-	//std::cout << "Welcome to CANQueens Project" << std::endl;
+	std::cout << "Welcome to CANQueens Project" << std::endl;
 
 	//for (int i = 0; i < 50; i++) {
 	//	CA myCA;
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 	//FLIF myFLIF;
 	//std::cout << myFLIF.toString() << std::endl;
 
-	int n = 5;
+	int n = 8;
 	int* chromosome;
 	Board myBoard(n);
 	//CA** board = myBoard.getBoard();
@@ -42,6 +42,7 @@ int main(int argc, char** argv) {
 	
 	// 202605 ONEMLI
 	// 3 bit olursa ama n = 8 olmazsa yasakli bitleri belirlemek gerek
+	// Cok buyuk ceza verilebilir
 	// Modulo falan olabilir
 	chromosome = myBoard.getChromosome();
 	std::string temp = "\n";
@@ -50,14 +51,18 @@ int main(int argc, char** argv) {
 	}
 	std::cout << temp << std::endl;
 
-
-
 	//Memory myMemory;
 	//std::cout << myMemory.toString() << std::endl;
-
+	//int k = 5;
+	//Value myValue(k);
+	//int* chromosome = new int[k];
+	//chromosome[0] = 3;
+	//chromosome[1] = 1;
+	//chromosome[2] = 4;
+	//chromosome[3] = 0;
+	//chromosome[4] = 3;
 	Value myValue(n);
 	std::cout << myValue.toString() << std::endl;
-
 	myValue.update(chromosome);
 
 	//Explore myExplore;
