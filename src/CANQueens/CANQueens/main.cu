@@ -1,5 +1,3 @@
-// HI HI HI HI 
-
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 #include <iostream>
@@ -33,25 +31,25 @@ int main(int argc, char** argv) {
 	//FLIF myFLIF;
 	//std::cout << myFLIF.toString() << std::endl;
 
-	int n = 8;
-	int* chromosome;
-	Board myBoard(n);
+	//int n = 8;
+	//int* chromosome;
+	//Board myBoard(n);
 	//CA** board = myBoard.getBoard();
 	//std::cout << board[2][3].getID() << std::endl;
-	std::cout << myBoard.toString(Board::PrintType::chrom) << std::endl;
-	std::cout << myBoard.toString(Board::PrintType::comp) << std::endl;
-	std::cout << myBoard.toString(Board::PrintType::full) << std::endl;
+	//std::cout << myBoard.toString(Board::PrintType::chrom) << std::endl;
+	//std::cout << myBoard.toString(Board::PrintType::comp) << std::endl;
+	//std::cout << myBoard.toString(Board::PrintType::full) << std::endl;
 	
 	// 202605 ONEMLI
 	// 3 bit olursa ama n = 8 olmazsa yasakli bitleri belirlemek gerek
 	// Cok buyuk ceza verilebilir
 	// Modulo falan olabilir
-	chromosome = myBoard.getChromosome();
-	std::string temp = "\n";
-	for (int i = 0; i < n; i++) {
-		temp += std::to_string(i) + "| " + std::to_string(chromosome[i]) + " |\n";
-	}
-	std::cout << temp << std::endl;
+	//chromosome = myBoard.getChromosome();
+	//std::string temp = "\n";
+	//for (int i = 0; i < n; i++) {
+	//	temp += std::to_string(i) + "| " + std::to_string(chromosome[i]) + " |\n";
+	//}
+	//std::cout << temp << std::endl;
 
 	//Memory myMemory;
 	//std::cout << myMemory.toString() << std::endl;
@@ -63,15 +61,24 @@ int main(int argc, char** argv) {
 	//chromosome[2] = 4;
 	//chromosome[3] = 0;
 	//chromosome[4] = 3;
-	Value myValue(n);
-	std::cout << myValue.toString() << std::endl;
-	myValue.update(chromosome);
+	//Value myValue(n);
+	//std::cout << myValue.toString() << std::endl;
+	//myValue.update(chromosome);
 
 	//Explore myExplore;
 	//std::cout << myExplore.toString() << std::endl;
 
 	//Chromosome myChromosome;
 	//std::cout << myChromosome.toString() << std::endl;
+
+	//200612
+
+	for (int i = 0; i < 50; i++) {
+		CA myCA;
+		std::cout << myCA.getID() << std::endl;
+		std::cout << myCA.getIgnition() << std::endl;
+		std::cout << myCA.toString() << std::endl;
+	}
 
 	return 0;
 }

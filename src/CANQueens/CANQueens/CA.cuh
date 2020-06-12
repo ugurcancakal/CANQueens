@@ -34,8 +34,6 @@ public:
     bool getIgnition();
     int getID();
 
-
-
 };
 
 #endif // CA_H
