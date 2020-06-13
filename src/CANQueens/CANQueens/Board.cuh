@@ -1,5 +1,5 @@
 /* Board Class Header File
- *
+ * Check the source file for detailed explanations
  * 200516
  * author = @ugurc
  * ugurcan.cakal@gmail.com
@@ -22,32 +22,40 @@
 
 class Board {
 private:
+    // Data
+    int row; // n
+    int col; // log2n
     CA** board;
     int* chromosome;
 
-    int row; // n
-    int col; // log2n
-    
+    // Initiation - Destruction
     CA** initiateBoard(int row, int col);
-    void deleteBoard(CA** board, int row, int col);
-
+    void deleteBoard(CA** board, int row);
     int* initiateCh(int row);
     void deleteCh(int* chromosome);
 
+    // Printing
     std::string fullBoard();
     std::string compressedBoard();
     std::string chromosomeDecimal();
 
+    // Representation
     void boardToCh();
 
 public:
-    enum class PrintType { full, comp, chrom };
+    // Constructors - Destructors
     Board(int n = 8);
     ~Board();
+
+    // Printing
+    enum class PrintType { full, comp, chrom };
     std::string toString(PrintType type);
-    int* getChromosome();
+
+    // Update
     void update();
-    //CUDA_CALLABLE_MEMBER std::string toString();
+
+    // GET
+    int* getChromosome();
 };
 
 #endif // BOARD_H
