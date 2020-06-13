@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 #include "CA.cuh"
-#include "FLIF.cuh"
+#include "Controller.cuh"
 #include "Board.cuh"
 #include "Memory.cuh"
 #include "Explore.cuh"
@@ -73,12 +73,26 @@ int main(int argc, char** argv) {
 
 	//200612
 
-	for (int i = 0; i < 50; i++) {
+	/*for (int i = 0; i < 50; i++) {
 		CA myCA;
 		std::cout << myCA.getID() << std::endl;
 		std::cout << myCA.getIgnition() << std::endl;
 		std::cout << myCA.toString() << std::endl;
-	}
+	}*/
+
+
+	//int timeStep = 10;
+	//CA myCA(10);
+
+	//myCA.runFor(timeStep);
+	//std::cout << myCA.getRaster(timeStep) << std::endl;
+	//myCA.saveRaster("rast", timeStep);
+
+	int n = 8;
+
+	Controller myController(n);
+	myController.runFor(10);
+
 
 	return 0;
 }

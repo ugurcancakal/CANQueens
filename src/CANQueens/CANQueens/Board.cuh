@@ -42,10 +42,11 @@ private:
 
 public:
     enum class PrintType { full, comp, chrom };
-    Board(int n);
+    Board(int n = 8);
     ~Board();
     std::string toString(PrintType type);
     int* getChromosome();
+    void update();
     //CUDA_CALLABLE_MEMBER std::string toString();
 };
 

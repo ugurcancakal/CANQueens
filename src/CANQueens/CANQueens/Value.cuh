@@ -20,9 +20,10 @@
 class Value {
 private:
     int row;
-    int fitness(int* chromosome);
+    
 public:
-    Value(int n);
+    int fitness(int* chromosome);
+    Value(int n = 8);
     ~Value();
     std::string toString();
     void update(int* chromosome);

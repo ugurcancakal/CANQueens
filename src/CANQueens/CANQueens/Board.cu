@@ -30,6 +30,15 @@ CA** Board::initiateBoard(int row, int col) {
     return board;
 }
 
+void Board::update() {
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            board[i][j].update();
+        }
+    }
+    boardToCh();
+}
+
 void Board::deleteBoard(CA** board, int row, int col) {
     for (int i = 0; i < row; ++i) {
         delete[] board[i];
