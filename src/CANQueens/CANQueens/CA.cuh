@@ -23,13 +23,25 @@
 class CA {
 
 private:
+    // Default values for CA intiation
+    static int d_n_neuron;
+    static float d_inh;
+    static float d_conn;
+    static float d_threshold;
+    static float d_C[7];
+    static int nextID;
+
+protected:
+    // Data
     int n_neuron;
+    int n_threshold;
     int n_inhibitory;
     int n_excitatory;
-    int n_threshold;
-    bool ignition;
     int ID;
-    std::vector<std::vector<bool>> activityRecord; //activityRecord[timeStep][n_id]
+    bool ignition;
+
+    //activityRecord[timeStep][n_id]
+    std::vector<std::vector<bool>> activityRecord; 
     
     // Constant Parameters
     float theta; // firing threshold
@@ -49,45 +61,42 @@ private:
     std::vector<float> post_synaptic; // Post-synaptic Firing Flags
 
     // Updates
-    
     void updateFlags();
-    void updateEF();
+    void updateE();
+    void updateF();
     void updateWeights();
 
     // Inits
-    void initWeights(bool print);
+    void initWeights(float connectivity, bool print);
     void initFlags();
 
     //Methods
     float dotP(std::vector<float>& weight, std::vector<bool>& flag);
-    //int firingStatus(int timeStep);
-    int firingStatus(std::vector<bool>& firings);
+    int num_fire(std::vector<bool>& firings);
     std::string dateTimeStamp(const char* filename);
 
-protected:
-    static int d_n_neuron;
-    static float d_inh;
-    static float d_threshold;
-    static float d_C[7];
-    static int nextID;
-
 public:
-    CA(int n = d_n_neuron, 
-        float threshold = d_threshold, 
-        float inh = d_inh, 
-        float* C = d_C, 
-        bool print = false);
+    // Constructors - Destructors
+    CA(int n = d_n_neuron,
+       float threshold = d_threshold,
+       float inh = d_inh,
+       float connectivity = d_conn,
+       float* C = d_C, 
+       bool print = false);
     ~CA();
-    std::string toString(int timeStep);
-    //CUDA_CALLABLE_MEMBER std::string toString();
-    bool getIgnition();
-    int getID();
+
+    // Running
     void runFor(int timeStep);
-    // Formatting
+    void update();
+
+    // Printing
+    std::string toString(int timeStep);
     std::string getRaster(int timeStep);
     void saveRaster(char* filename, int timeStep);
-    
-    void update();
+
+    // GET
+    bool getIgnition();
+    int getID();       
 };
 
 #endif // CA_H

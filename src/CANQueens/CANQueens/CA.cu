@@ -1,5 +1,5 @@
 /* Cell Assembly Class Source File
- *
+ * Parent class for Explore and Memory
  * 200516
  * author = @ugurc
  * ugurcan.cakal@gmail.com
@@ -7,29 +7,349 @@
 
 #include "CA.cuh"
 
+// Default values for CA initiation
 int CA::nextID = 0;
 int CA::d_n_neuron = 10;
-float CA::d_inh = 0.3f;
+float CA::d_inh = 0.2f;
+float CA::d_conn = 1.0f;
 float CA::d_threshold = 0.3f;
 float CA::d_C[7] = { 1.0, 1.0, 1.0, 1.0, 0.2, 1.0, 1.0 };
 
-//CA::CA() {
-//    ignition = (0 == (rand() % 2));
-//    ID = ++nextID;
-//    //std::cout << "CA constructed with ID: " << ID << std::endl;
-//}
-//
-//CA::CA(int n) {
-//    n_neuron = n;
-//    ignition = (0 == (rand() % 2));
-//    ID = ++nextID;
-//    //std::cout << "CA constructed with ID: " << ID << std::endl;
-//}
+// PROTECTED MEMBERS
+// Updates
+void CA::updateFlags() {
+    /* Update the firing flags of the FLIF neurons inside CA
+     * according tho energy levels and fatigueness
+     */
 
-CA::CA(int n, float threshold, float inh, float* C, bool print) {
+    // Size check
+    if (fatigue.size() != energy.size()) {
+        std::cout << "Fatigue vector size is different than energy vector size!" << std::endl;
+        return;
+    }
+    else if (flags.size() != energy.size()) {
+        std::cout << "Flag vector size is different than energy and fatigue vectors size!" << std::endl;
+        return;
+    }
+
+    // Iterators
+    std::vector<bool>::iterator it;
+    std::vector<float>::iterator it_f;
+    std::vector<float>::iterator it_e;
+    it_f = fatigue.begin();
+    it_e = energy.begin();
+
+    // Update
+    for (it = flags.begin(); it < flags.end(); it++) {
+        if (*it_e - *it_f > theta) {
+            *it = true;
+        }
+        else {
+            *it = false;
+        }
+        it_f++;
+        it_e++;
+    }
+}
+
+void CA::updateE() {
+    /* Update energy levels of the FLIF neurons inside CA
+     * according to weights and firing flags
+     */
+
+    // Size check
+    if (weights.size() != energy.size()) {
+        std::cout << "Weight matrix row size is different than energy vector size!" << std::endl;
+        return;
+    }
+    else if (flags.size() != energy.size()) {
+        std::cout << "Flag vector size is different than energy and weight vectors size!" << std::endl;
+        return;
+    }
+    // Iterators
+    std::vector<float>::iterator it_e;
+    std::vector<std::vector<float>>::iterator it_w;
+    std::vector<bool>::iterator it_f;
+    it_w = weights.begin();
+    it_f = flags.begin();
+
+    // Update
+    for (it_e = energy.begin(); it_e < energy.end(); it_e++) {
+        if (*it_f) {
+            *it_e = dotP(*it_w, flags);
+        }
+        else {
+            *it_e = (1.0f / c_decay) * (*it_e) + dotP(*it_w, flags);
+        }
+        it_w++;
+        it_f++;
+    }
+}
+
+void CA::updateF() {
+    /* Update fatigueness of the FLIF neurons inside CA
+     * according to recover rate
+     */
+    // Size Check
+    // Size check
+    if (fatigue.size() != flags.size()) {
+        std::cout << "Fatigue vector size is different than flag vector size!" << std::endl;
+        return;
+    }
+
+    //Iterators
+    std::vector<bool>::iterator it;
+    std::vector<float>::iterator it_f;
+    it_f = fatigue.begin();
+
+    //Update
+    for (it = flags.begin(); it < flags.end(); it++) {
+        if (*it) {
+            *it_f += f_fatigue;
+        }
+        else {
+            if (*it_f - f_recover > 0.0f) {
+                *it_f = *it_f - f_recover;
+            }
+            else {
+                *it_f = 0.0f;
+            }
+        }
+        it_f++;
+    }
+}
+
+void CA::updateWeights() {
+    /* Update weights of the FLIF neurons inside CA
+     * according to hebbian learning rule.
+     * That is, neurons fire together, wire together.
+     * !! W-current W-average updates are to be done
+     * !! w must be between 0<w<1
+     */
+    float delta = 0.0f;
+    float sign = 1.0f;
+    // Size check
+    if (weights.size() != flags.size()) {
+        std::cout << "Weight matrix row size is different than flag vector size!" << std::endl;
+        return;
+    }
+
+    // Iterators
+    std::vector<bool>::iterator it;
+    std::vector<float>::iterator it_weight;
+
+    std::vector<std::vector<float>>::iterator it_w;
+    it_w = weights.begin();
+
+    // Update
+    for (it = flags.begin(); it < flags.end(); it++) {
+        if (*it == true) {
+            for (it_weight = (*it_w).begin(); it_weight <(*it_w).end(); it_weight++) {
+                sign = *it_weight / abs(*it_weight);
+                if (*it == true) {
+                    delta = alpha* (1.0f - abs(*it_weight))* exp(w_average - w_current);
+                }
+                else {
+                    delta = (-1.0f)* alpha* abs(*it_weight) * exp(w_current - w_average);
+                }
+                
+
+                *it_weight += sign*delta;
+            }
+        }
+        else {
+            continue;
+        }
+        it_w++;
+    }
+}
+
+// Inits
+void CA::initWeights(float connectivity, bool print) {
+    /* Initialize neuron weights randomly
+     * ! all connected for now but it is required to
+     * be defined by a parameter
+     * Sign of the weigth is determined by the inhibitory
+     * or exhibitory characteristic of the neuron
+     *
+     * An example connection map:
+     * -------------------
+     * | - - + + + + + + |
+     * | - - + + + + + + |
+     * | - - + + + + + + |
+     * | - - + + + + + + |
+     * | - - + + + + + + |
+     * | - - + + + + + + |
+     * | - - + + + + + + |
+     * | - - + + + + + + |
+     * -------------------
+     * 0<w<1 initially
+     *
+     * Parameters:
+     *      connectivity(float):
+     *          connectivity ratio inside CA.
+     *          1.0 means fully connected.
+     *      print(bool):
+     *          print the weights or not
+     */
+
+    float sign = -1.0f;
+    weights.resize(n_neuron);
+    std::vector<std::vector<float>>::iterator it;
+    for (it = weights.begin(); it < weights.end(); it++) {
+        (*it).resize(n_neuron);
+    }
+
+    // Connectivity range check
+    if (connectivity < 0.0f) {
+        connectivity = 0.0f;
+    }
+    else if (connectivity > 1.0f) {
+        connectivity = 1.0f;
+    }
+
+    // Iterators
+    std::vector<std::vector<float>>::iterator it_w;
+    std::vector<float>::iterator it_weight;
+    int counter = 0;
+
+    for (it_w = weights.begin(); it_w < weights.end(); it_w++) {
+        for (it_weight = (*it_w).begin(); it_weight < (*it_w).end(); it_weight++) {
+            sign = counter < n_inhibitory ? -1.0f : 1.0f;
+            if (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) < connectivity) {
+                *it_weight = sign * static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+            }
+            else {
+                *it_weight = 0.0f;
+            }
+            if (print) {
+                std::cout << *it_weight << " " << std::endl;
+            }
+            counter++;
+        }
+    }
+}
+
+void CA::initFlags() {
+    /* Initialize firing flags randomly
+     */
+    flags.resize(n_neuron); 
+    std::vector<bool>::iterator it;
+    for (it = flags.begin(); it < flags.end(); it++) {
+        *it = 0 == (rand() % 2);
+    }
+}
+
+// Methods
+float CA::dotP(std::vector<float>& weight, std::vector<bool>& flag) {
+    /* Dot product of two vectors
+     * 
+     * Parameters:
+     *      weights(std::vector<float>&):
+     *          weight vector consisting of floating point numbers
+     *      flags(std::vector<bool>&):
+     *          firing flag vector consisting of booleans
+     *
+     * Returns:
+     *      sum(float):
+     *          dot product result
+     */
+    
+    float sum = 0.0f;
+    int i = 0;
+    std::vector<bool>::iterator it_f;
+    std::vector<float>::iterator it_w;
+    it_w = weight.begin();
+    for (it_f = flags.begin(); it_f < flags.end(); it_f++) {
+        if (*it_f) {
+            sum += *it_w;
+        }
+        else {
+            continue;
+        }
+        it_w++;
+    }
+    return sum;
+}
+
+int CA::num_fire(std::vector<bool>& firings) {
+    /* Number of neurons fired in a given flag vector.
+     *
+     * Parameters: 
+     *      firings(std::vector<bool>&):
+     *          firing flag vector consisting of booleans
+     *
+     * Returns:
+     *      num(int):
+     *          total number of fire
+     */
+    int fire = 0;
+    std::vector<bool>::iterator it;
+    for (it = firings.begin(); it < firings.end(); it++) {
+        if (*it) {
+            fire++;
+        }
+    }
+    return fire;
+}
+
+std::string CA::dateTimeStamp(const char* filename) {
+    /* Create an @ugurc format timestamp
+     * For example the date 09 May 1995 and time 02:48:05
+     * is encoded like year-month-day-hour-minute-second
+     * 950509024805
+     *
+     * Parameters:
+     *      filename (const char*):
+     *          filename to be concatenated with the timestamp
+     *
+     * Returns:
+     *		nameSTAMP(std::string):
+     *			name with a dateTimeStamp like ugurc950509024805
+     */
+
+    time_t t = time(0);   // get time now
+    struct tm* now = localtime(&t);
+    char buffer[80];
+    strftime(buffer, 80, "%y%m%d%H%M%S", now);
+    std::string dateTime = buffer;
+    return filename + dateTime;
+}
+
+// PUBLIC MEMBERS
+// Constructors - Destructors
+CA::CA(int n, float threshold, float inh, float connectivity, float* C, bool print) {
+    /* Constructor
+     * Intitialize constant parameters of decision process
+     * and data structures which stores information
+     * related to neurons
+     * 
+     * Parameters:
+     *      n(int):
+     *          number of neurons inside CA
+     *      threshold(float):
+     *          CA activation threshold 0<t<1
+     *      inh(float):
+     *          inhibitory neuron rate
+     *      connectivity(float):
+     *          connectivity ratio inside CA.
+     *          1.0 means fully connected.
+     *      C[7](float*):
+     *          1D array consisting of constant parameters
+     *          - theta; // firing threshold
+     *          - c_decay; // decay constant d
+     *          - f_recover; // recovery constant F^R
+     *          - f_fatigue; // fatigue constant F^C
+     *          - alpha; // learning rate
+     *          - w_average; // constant representing average total synaptic strength of the pre-synaptic neuron.
+     *          - w_current; // current total synaptic strength
+     *      print(bool):
+     *          print the CA data or not
+     */
+    
     n_neuron = n;
-    n_threshold = floor(n * threshold);
-    n_inhibitory = floor(n * inh);
+    n_threshold = ceil(n * threshold);
+    n_inhibitory = ceil(n * inh);
     n_excitatory = n - n_inhibitory;
     ID = ++nextID;
     ignition = (0 == (rand() % 2));
@@ -44,7 +364,7 @@ CA::CA(int n, float threshold, float inh, float* C, bool print) {
     w_current = C[6]; // current total synaptic strength
 
     // Neurons
-    initWeights(print);
+    initWeights(connectivity, print);
     initFlags();
     energy.resize(n_neuron);
     fatigue.resize(n_neuron);
@@ -69,149 +389,120 @@ CA::CA(int n, float threshold, float inh, float* C, bool print) {
 }
 
 CA::~CA() {
+    /* Destructor
+     * Not in use for now
+     */
     //std::cout << "CA destructed" << std::endl;
 }
 
-void CA::initWeights(bool print) {
-    // all connected for now
-    float sign = -1.0f;
-    weights.resize(n_neuron);
-    for (int i = 0; i < n_neuron; i++) {
-        weights[i].resize(n_neuron);
-    }
+// Running
+void CA::runFor(int timeStep) {
+    /* Run the CA for defined timestep and record the activity
+     * Implemented for raster plot drawing
+     *
+     * Parameters:
+     *      timestep(int):
+     *          number of steps to stop running
+     */
+    activityRecord.resize(timeStep);
+    std::vector<std::vector<bool>>::iterator it;
+    std::vector<bool>::iterator it_f;
 
-    for (int i = 0; i < n_neuron; i++) {
-        for (int j = 0; j < n_neuron; j++) {
-            sign = j < n_inhibitory ? -1.0f : 1.0f;
-            weights[i][j] = sign*static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-            if (print) {
-                std::cout << weights[i][j] << " " << std::endl;
-            }
+    for (it = activityRecord.begin(); it < activityRecord.end(); it++) {
+        for (it_f = flags.begin(); it_f < flags.end(); it_f++) {
+            (*it).push_back(*it_f);
         }
+        update();
     }
 }
 
-void CA::initFlags() {
-    flags.resize(n_neuron);
-    for (int i = 0; i < n_neuron; i++) { 
-        flags[i] = 0 == (rand() % 2);
-    }
+void CA::update() {
+    /* Update the CA by updating neuron related data structures
+     * ! pre_synaptic and post_synaptic not in use
+     */
+    updateWeights();
+    updateE();
+    updateF();
+    updateFlags();
+    ignition = num_fire(flags);
 }
 
+// Printing
 std::string CA::toString(int timeStep) {
+    /* Construct the string representing whole activity record 
+     * in given timestep
+     * 
+     * Parameters:
+     *      timeStep(int):
+     *          number of steps to stop
+     *
+     * Returns:
+     *      record(std::string):
+     *          activity record
+     */
+
     std::string temp = "\n";
-    for (int i = 0; i < timeStep; i++)
-    {
-        for (int j = 0; j < n_neuron; j++)
-        {
-            temp+= to_string(activityRecord[i][j]) + "\t";
+    std::vector<std::vector<bool>>::iterator it;
+    std::vector<bool>::iterator it_act;
+
+    for (it = activityRecord.begin(); it < activityRecord.end(); it++) {
+        for (it_act = (*it).begin(); it_act< (*it).end(); it_act++) {
+            temp += to_string(*it_act) + "\t";
         }
         temp += " \n";
     }
     return temp;
 }
 
-bool CA::getIgnition() {
-	return ignition;
-}
-
-int CA::getID() {
-    return ID;
-}
-
-void CA::runFor(int timeStep) {
-    activityRecord.resize(timeStep);
-    for (int i = 0; i < timeStep; i++) {
-        for (int j = 0; j < n_neuron; j++) {
-            activityRecord[i].push_back(flags[j]);
-        }
-        update();
-    }
-}
-
-void CA::update(){
-    updateWeights();
-    updateEF();
-    updateFlags();
-    ignition = firingStatus(flags);
-}
-
-void CA::updateFlags() {
-    //flags[i] = 0 == (rand() % 2);
-    for (int i = 0; i < n_neuron; i++) {
-        if (energy[i] - fatigue[i] > theta) {
-            flags[i] = true;
-        }
-        else {
-            flags[i] = false;
-        }
-    }
-}
-
-void CA::updateEF() {
-    for (int i = 0; i < n_neuron; i++) {
-        if (flags[i]) {
-            energy[i] = dotP(weights[i], flags);
-            fatigue[i] += f_fatigue;
-        }
-        else {
-            energy[i] = (1.0f/c_decay)*energy[i] + dotP(weights[i], flags);
-            if (fatigue[i] - f_recover > 0) {
-                fatigue[i] = fatigue[i] - f_recover;
-            }
-            else {
-                fatigue[i] = 0.0f;
-            }
-        }
-        //std::cout << "\nNeuronID : " << i << std::endl
-        //        << "Energy Level : " << energy[i] << std::endl
-        //        << "Fatigue Level : " << fatigue[i] << std::endl;
-    }
-}
-
-float CA::dotP(std::vector<float>& weight, std::vector<bool>& flag) {
-    float sum = 0.0f;
-    for (int i = 0; i < n_neuron; i++) {
-        if (flag[i]) {
-            sum += weight[i];
-        }
-        else {
-            continue;
-        }
-    }
-    return sum;
-}
-
-void CA::updateWeights() {
-    // W-current W-average updates are necessary
-    float delta = 0.0f;
-
-    for (int i = 0; i < n_neuron; i++) {
-        if (flags[i] == 1) {
-            for (int j = 0; j < n_neuron; j++) {
-                if (flags[i] == true) {
-                    alpha* (1.0f - weights[i][j]) * exp(w_average - w_current);
-                }
-                else {
-                    (-1.0f)*alpha* weights[i][j] * exp(w_current - w_average);
-                }
-            }
-        }
-        else {
-            continue;
-        }
-    }
-}
-
 std::string CA::getRaster(int timeStep) {
+    /* Construct the string representing whole raster plot
+     * for given time interval. IDs with * represents
+     * inhibitory neurons.
+     *
+     *  N_ID    ||         SPIKE ACTIVITY
+     *  --------------------------------------------
+     *  0*      ||      |
+     *  1       ||      |               |
+     *  2       ||      |                       |
+     *  3       ||
+     *  --------------------------------------------
+     *  TIME    ||      0       1       2       3
+     *  --------------------------------------------
+     *  FIRE    ||      2       0       1       1
+     *  --------------------------------------------
+     *  IGNIT   ||      1       0       1       1
+     *
+     * Parameters:
+     *      timeStep(int):
+     *          number of steps to stop
+     *
+     * Returns:
+     *      raster(std::string):
+     *          raster plot
+     */
+
+    // Size Check
+    if (timeStep > activityRecord.size()) {
+        std::cout << "Not enough data to show " << timeStep << " steps!" << std::endl;
+        timeStep = activityRecord.size();
+    }
+    if (timeStep < activityRecord.size()) {
+        std::cout << "Last " << timeStep << " steps will be printed!" << std::endl;
+    }
 
     std::string temp = "\n";
+    std::vector<std::vector<bool>>::iterator it;
+    std::vector<bool>::iterator it_act;
+
+    // Header
     temp += "  \t";
     temp += " \n";
     temp += "N_ID \t||";
     temp += std::string(3 * (timeStep + 1), ' ');
     temp += "SPIKE ACTIVITY\n";
     temp += std::string(8 * (timeStep + 1) + 4, '-') + "\n";
+    
+    // Body
     for (int i = 0; i < n_neuron; i++) {
         temp += std::to_string(i);
         if (i < n_inhibitory) {
@@ -220,7 +511,7 @@ std::string CA::getRaster(int timeStep) {
         else {
             temp += "\t||\t";
         }
-        for (int j = 0; j < timeStep; j++) {
+        for (int j = (activityRecord.size() -timeStep); j < activityRecord.size(); j++) {
             if (activityRecord[j][i]) {
                 temp += "|\t";
             }
@@ -230,7 +521,7 @@ std::string CA::getRaster(int timeStep) {
         }
         temp += "\n";
     }
-    
+
     temp += std::string(8 * (timeStep + 1) + 4, '-') + "\n";
     temp += "TIME \t||\t";
     for (int i = 0; i < timeStep; i++) {
@@ -240,18 +531,26 @@ std::string CA::getRaster(int timeStep) {
     temp += std::string(8 * (timeStep + 1) + 4, '-') + "\n";
     temp += "FIRE \t||\t";
     for (int i = 0; i < timeStep; i++) {
-        temp += std::to_string(firingStatus(activityRecord[i])) + "\t";
+        temp += std::to_string(num_fire(activityRecord[i])) + "\t";
     }
     temp += "\n";
     temp += std::string(8 * (timeStep + 1) + 4, '-') + "\n";
     temp += "IGNIT \t||\t";
     for (int i = 0; i < timeStep; i++) {
-        temp += std::to_string(firingStatus(activityRecord[i]) >= n_threshold) + "\t";
+        temp += std::to_string(num_fire(activityRecord[i]) >= n_threshold) + "\t";
     }
     return temp;
 }
 
 void CA::saveRaster(char* filename, int timeStep) {
+    /* Save the raster plot constructed by getRaster()
+     * to a .txt file, into ./test/raster/ folder.
+     * Parameters:
+     *      filename(char*):
+     *          filename to be stamped then used
+     *      timeStep(int):
+     *          number of steps to stop
+     */
     std::string name = "./test/raster/" + dateTimeStamp(filename) + ".txt";
     std::ofstream raster(name, std::ofstream::out);
 
@@ -260,45 +559,23 @@ void CA::saveRaster(char* filename, int timeStep) {
     }
 }
 
-std::string CA::dateTimeStamp(const char* filename) {
-    /* Create an @ugurc format timestamp
-     * For example The date 09 May 1995 and time 02:48:05
-     * is encoded like year-month-day-hour-minute-second
-     * 950509024805
-     *
-     * Parameters:
-     *      filename (const char*):
-     *          filename to be concatenated with the timestamp
+// GET
+bool CA::getIgnition() {
+    /* Ignition getter
      *
      * Returns:
-     *		nameSTAMP(std::string):
-     *			name with a dateTimeStamp like ugurc950509024805
+     *      ignition(bool):
+     *          ignition status of the CA
      */
-
-    time_t t = time(0);   // get time now
-    struct tm* now = localtime(&t);
-    char buffer[80];
-    strftime(buffer, 80, "%y%m%d%H%M%S", now);
-    std::string dateTime = buffer;
-    return filename + dateTime;
+    return ignition;
 }
 
-//int CA::firingStatus(int timeStep) {
-//    int fire = 0;
-//    for (int i = 0; i < n_neuron; i++) {
-//        if (activityRecord[timeStep][i]) {
-//            fire++;
-//        }
-//    }
-//    return fire;
-//}
-
-int CA::firingStatus(std::vector<bool>& firings) {
-    int fire = 0;
-    for (int i = 0; i < n_neuron; i++) {
-        if (firings[i]) {
-            fire++;
-        }
-    }
-    return fire;
+int CA::getID() {
+    /* ID getter
+     *
+     * Returns:
+     *      ID(int):
+     *          ID of the CA starting from 0
+     */
+    return ID;
 }

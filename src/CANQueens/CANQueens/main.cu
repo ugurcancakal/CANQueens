@@ -81,17 +81,17 @@ int main(int argc, char** argv) {
 	}*/
 
 
-	//int timeStep = 10;
-	//CA myCA(10);
+	int timeStep = 10;
+	CA myCA(10);
 
-	//myCA.runFor(timeStep);
-	//std::cout << myCA.getRaster(timeStep) << std::endl;
-	//myCA.saveRaster("rast", timeStep);
+	myCA.runFor(timeStep);
+	std::cout << myCA.getRaster(timeStep) << std::endl;
+	myCA.saveRaster("rast", timeStep);
 
-	int n = 8;
+	//int n = 8;
 
-	Controller myController(n);
-	myController.runFor(10);
+	//Controller myController(n);
+	//myController.runFor(10);
 
 
 	return 0;

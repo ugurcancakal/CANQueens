@@ -10,11 +10,12 @@
 int Explore::n_neuron = 400;
 float Explore::inh = 0.3f;
 float Explore::threshold = 0.3f;
+float Explore::conn = 1.0f;
 float Explore::C[7] = { 1.0, 1.0, 1.0, 1.0, 0.2, 1.0, 1.0 };
 
 Explore::Explore() {
     std::cout << "Explore constructed" << std::endl;
-    explore = new CA(n_neuron, threshold, inh, C);
+    explore = new CA(n_neuron, conn, threshold, inh, C);
 }
 
 Explore::~Explore() {

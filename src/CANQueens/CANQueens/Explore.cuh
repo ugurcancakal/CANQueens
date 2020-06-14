@@ -26,6 +26,7 @@ private:
 protected:
     static int n_neuron;
     static float inh;
+    static float conn;
     static float threshold;
     static float C[7];
 public:
