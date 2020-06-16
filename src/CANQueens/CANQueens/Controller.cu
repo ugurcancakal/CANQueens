@@ -11,8 +11,9 @@ Controller::Controller(int n) {
     std::cout << "Controller constructed" << std::endl
               << "Welcome to CANQueens Project" << std::endl;
 
+    srand(time(NULL));
+
     n_neuron = n;
-    srand(time(0));
     board = new Board(n);
     value = new Value(n);
     chromosome = board -> getChromosome();

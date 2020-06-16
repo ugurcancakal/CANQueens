@@ -22,9 +22,9 @@
 
 struct record {
     std::vector<bool> flags;
-    std::vector<std::vector<float>> weights;
     std::vector<float> energy;
     std::vector<float> fatigue;
+    std::vector<std::vector<float>> weights;
 };
 
 class CA {
@@ -50,6 +50,8 @@ protected:
     //activityRecord[timeStep][n_id]
     std::vector<std::vector<bool>> activityRecord; 
     std::vector<record> activity;
+    std::vector<CA*> incomingList;
+    std::vector<CA*> outgoingList;
 
     // Constant Parameters
     float theta; // firing threshold
@@ -75,7 +77,8 @@ protected:
     void updateWeights();
 
     // Inits
-    void initWeights(int n, float connectivity, bool print);
+    void initWeights(int in, int out, float connectivity, float inhibitory,
+        std::vector<std::vector<float>>& weight);
     void initFlags(int n);
 
     //Methods
@@ -83,6 +86,14 @@ protected:
     int num_fire(std::vector<bool>& firings);
     std::string dateTimeStamp(const char* filename);
 
+    //Connection
+    
+
+    void addIncomingWeights(std::vector<std::vector<float>>& resting,
+        std::vector<std::vector<float>>& in);
+
+    void addOutgoingWeights(std::vector<std::vector<float>>& resting,
+        std::vector<std::vector<float>>& out);
 
     template <typename T>
     std::string vectorToString(std::vector<T>& vec) {
@@ -104,6 +115,10 @@ public:
        bool print = false);
     ~CA();
 
+    // Connect
+    void connectIn(CA* incoming, float strength, float inhibitory, bool propagate = true);
+    void connectOut(CA* outgoing, float strength, float inhibitory, bool propagate = true);
+
     // Running
     void runFor(int timeStep);
     void update();
@@ -119,6 +134,7 @@ public:
     // GET
     bool getIgnition();
     int getID();       
+    int getN();
 };
 
 #endif // CA_H

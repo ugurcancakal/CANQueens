@@ -188,7 +188,8 @@ void CA::updateWeights() {
 }
 
 // Inits
-void CA::initWeights(int n, float connectivity, bool print) {
+void CA::initWeights(int in, int out, float connectivity, float inhibitory,
+    std::vector<std::vector<float>>& weight) {
     /* Initialize neuron weights randomly
      * ! all connected for now but it is required to
      * be defined by a parameter
@@ -212,15 +213,19 @@ void CA::initWeights(int n, float connectivity, bool print) {
      *      connectivity(float):
      *          connectivity ratio inside CA.
      *          1.0 means fully connected.
-     *      print(bool):
-     *          print the weights or not
      */
-
+    int n_inh;
+    if (inhibitory > 0) {
+        n_inh = floor(1.0f / inhibitory);
+    }
+    else {
+        n_inh = -1;
+    }
     float sign = -1.0f;
-    weights.resize(n);
+    weight.resize(in);
     std::vector<std::vector<float>>::iterator it;
-    for (it = weights.begin(); it < weights.end(); it++) {
-        (*it).resize(n);
+    for (it = weight.begin(); it < weight.end(); it++) {
+        (*it).resize(out);
     }
 
     // Connectivity range check
@@ -236,17 +241,19 @@ void CA::initWeights(int n, float connectivity, bool print) {
     std::vector<float>::iterator it_weight;
     int counter = 0;
 
-    for (it_w = weights.begin(); it_w < weights.end(); it_w++) {
+    for (it_w = weight.begin(); it_w < weight.end(); it_w++) {
         for (it_weight = (*it_w).begin(); it_weight < (*it_w).end(); it_weight++) {
-            sign = counter < n_inhibitory ? -1.0f : 1.0f;
+            if (n_inh > 0) {
+                sign = (rand() % n_inh) == 0 ? -1.0f : 1.0f;
+            }
+            else {
+                sign = 1.0f;
+            }
             if (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) < connectivity) {
                 *it_weight = sign * static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
             }
             else {
                 *it_weight = 0.0f;
-            }
-            if (print) {
-                std::cout << *it_weight << " " << std::endl;
             }
             counter++;
         }
@@ -337,6 +344,36 @@ std::string CA::dateTimeStamp(const char* filename) {
     return filename + dateTime;
 }
 
+
+
+void CA::addIncomingWeights(std::vector<std::vector<float>>& resting, 
+    std::vector<std::vector<float>>& in) {
+
+    std::vector<std::vector<float>>::iterator it_in;
+
+    for (it_in = in.begin(); it_in < in.end(); it_in++) {
+        resting.push_back(*it_in);
+    }
+}
+
+void CA::addOutgoingWeights(std::vector<std::vector<float>>& resting, 
+    std::vector<std::vector<float>>& out) {
+
+    if (resting.size() < out.size()) {
+        std::cout << "Resting weight vector is smaller than outgoing connections" << std::endl;
+        return;
+    }
+
+    std::vector<std::vector<float>>::iterator it_w = resting.begin();
+    std::vector<std::vector<float>>::iterator it_out;
+
+    for (it_out = out.begin(); it_out < out.end(); it_out++) {
+        (*it_w).insert((*it_w).end(), (*it_out).begin(), (*it_out).end());
+        it_w++;
+    }
+
+}
+
 // PUBLIC MEMBERS
 // Constructors - Destructors
 CA::CA(int n, float threshold, float inh, float connectivity, float* C, bool print) {
@@ -385,7 +422,7 @@ CA::CA(int n, float threshold, float inh, float connectivity, float* C, bool pri
     w_current = C[6]; // current total synaptic strength
 
     // Neurons
-    initWeights(n_neuron, connectivity, print);
+    initWeights(n_neuron, n_neuron, connectivity, inh, weights);
     initFlags(n_neuron);
     energy.resize(n_neuron);
     fatigue.resize(n_neuron);
@@ -414,6 +451,28 @@ CA::~CA() {
      * Not in use for now
      */
     //std::cout << "CA destructed" << std::endl;
+}
+
+// Connect
+void CA::connectIn(CA* incoming, float strength, float inhibitory, bool propagate) {
+    incomingList.push_back(incoming);
+    std::vector<std::vector<float>> inWeights;
+    initWeights(incoming->getN(), getN(), strength, inhibitory, inWeights);
+    addIncomingWeights(weights, inWeights);
+    if (propagate) {
+        incoming->connectOut(this, strength, inhibitory, false);
+    }
+    
+}
+
+void CA::connectOut(CA* outgoing, float strength, float inhibitory, bool propagate) {
+    outgoingList.push_back(outgoing);
+    std::vector<std::vector<float>> outWeights;
+    initWeights(getN(), outgoing -> getN(), strength, inhibitory, outWeights);
+    addOutgoingWeights(weights, outWeights);
+    if (propagate) {
+        outgoing->connectIn(this, strength, inhibitory, false);
+    }
 }
 
 // Running
@@ -621,7 +680,7 @@ std::string CA::getActivity(int timeStep) {
     if (timeStep == 0) {
         timeStep = activity.size();
     }
-
+    temp += "CA ID: " + std::to_string(getID()) + "\n\n";
     for (it_r = activity.begin(); it_r < activity.end(); it_r++) {
         temp += "timeStep " + std::to_string(count) + "\n";
  
@@ -670,4 +729,8 @@ int CA::getID() {
      *          ID of the CA starting from 0
      */
     return ID;
+}
+
+int CA::getN(){
+    return n_neuron;
 }

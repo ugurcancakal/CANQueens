@@ -113,10 +113,35 @@ int main(int argc, char** argv) {
 	myEXP.runFor(timeStep);
 	std::cout << myEXP.getActivity() << std::endl;*/
 
-	int timeStep = 10;
+	/*int timeStep = 10;
 	Memory myMEM;
 	myMEM.runFor(timeStep);
-	std::cout << myMEM.getActivity() << std::endl;
+	std::cout << myMEM.getActivity() << std::endl;*/
+
+	CA* myCA1;
+	CA* myCA2;
+	CA* myCA3;
+
+	myCA1 = new CA(3);
+	myCA2 = new CA(4);
+	myCA3 = new CA(5);
+
+	myCA1 -> runFor(1);
+	myCA2 -> runFor(1);
+	myCA3 -> runFor(1);
+
+	myCA1 -> connectIn(myCA2, 0.2, 0.0);
+	myCA1->connectOut(myCA3, 0.2, 0.0);
+
+	myCA1->runFor(1);
+	myCA2->runFor(1);
+	myCA3->runFor(1);
+
+	std::cout << myCA1 -> getActivity() << std::endl;
+	std::cout << myCA2 -> getActivity() << std::endl;
+	std::cout << myCA3->getActivity() << std::endl;
+
+	//myCA1.connect(myCA2);
 
 	return 0;
 }
