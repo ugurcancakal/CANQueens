@@ -27,6 +27,9 @@ public:
     ~Value();
     std::string toString();
     void update(int* chromosome);
+
+    float activity(int n, int* chromosome);
+    int maxCollision(int n);
     
     //CUDA_CALLABLE_MEMBER std::string toString();
 };

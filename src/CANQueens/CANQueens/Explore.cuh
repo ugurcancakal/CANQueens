@@ -16,24 +16,56 @@
 
 #include <string>
 #include <iostream>
-#include "CA.cuh"
+#include <vector>
 
-//class Explore : public CA{
-class Explore {
+class Explore{
 private:
-    CA* explore;
+    static int d_n_neuron;
+    static float d_act;
 
 protected:
-    static int n_neuron;
-    static float inh;
-    static float conn;
-    static float threshold;
-    static float C[7];
+    float activation;
+    int n_activation;
+    int n_neuron;
+
+    std::vector<std::vector<bool>> activity;
+    
+    // Neurons
+    std::vector<bool> flags; // firing flags phi
+
+    // Updates
+    void updateFlags();
+
+    // Inits
+    void initFlags(int n, int n_act);
+
+    template <typename T>
+    std::string vectorToString(std::vector<T>& vec) {
+        std::string temp = "";
+        typename std::vector<T>::iterator it;
+        for (it = vec.begin(); it < vec.end(); it++) {
+            temp += std::to_string(*it) + " ";
+        }
+        return temp;
+    }
+
+    int num_fire(std::vector<bool>& firings);
+
 public:
-    Explore();
+    Explore(int n = d_n_neuron,
+            float act = d_act,
+            bool print = false);
     ~Explore();
     std::string toString();
-    void update();
+
+    // Running
+    void runFor(int timeStep);
+    void update(float act);
+    void updateA(float act);
+
+    //Activity
+    std::string getActivity(int timeStep = 0);
+    
     //CUDA_CALLABLE_MEMBER std::string toString();
 };
 

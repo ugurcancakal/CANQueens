@@ -11,6 +11,7 @@ Controller::Controller(int n) {
     std::cout << "Controller constructed" << std::endl
               << "Welcome to CANQueens Project" << std::endl;
 
+    n_neuron = n;
     srand(time(0));
     board = new Board(n);
     value = new Value(n);
@@ -40,12 +41,20 @@ void Controller::step() {
     // Show Board
     std::cout << board->toString(Board::PrintType::full) << std::endl;
     std::cout << board->toString(Board::PrintType::chrom) << std::endl;
+    
     // Evaluate Board
     std::cout << value->fitness(chromosome) << std::endl;
+
+    // Update Explore
+    float act = value->activity(n_neuron, chromosome);
+    explore->update(act);
+    std::cout << explore->toString() << std::endl;
+
+    // Update Memory
+    // memory->update();
+
     // Update Board
     board->update();
-    //explore->update();
-    //memory->update();
 }
 
 void Controller::runFor(int stepSize) {

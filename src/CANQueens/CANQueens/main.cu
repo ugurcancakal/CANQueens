@@ -10,7 +10,8 @@
 #include "Memory.cuh"
 #include "Explore.cuh"
 #include "Value.cuh"
-#include "Chromosome.cuh"
+
+
 
 int main(int argc, char** argv) {
 	/* Functions here are implemented to save the space in the main function.
@@ -81,21 +82,46 @@ int main(int argc, char** argv) {
 	}*/
 
 
-	int timeStep = 10;
-	CA myCA(10);
+	//int timeStep = 10;
+	//CA myCA(10);
 
-	myCA.runFor(timeStep);
-	std::cout << myCA.getRaster(timeStep) << std::endl;
-	myCA.saveRaster("rast", timeStep);
+	//myCA.runFor(timeStep);
+	//std::cout << myCA.getRaster(timeStep) << std::endl;
+
+	////myCA.runFor(5);
+	//std::cout << myCA.getActivity() << std::endl;
+
+	//myCA.saveRaster("rast", timeStep);
 
 	//int n = 8;
 
 	//Controller myController(n);
 	//myController.runFor(10);
 
+	//int max = maxCollision(n);
+
+	//std::cout << max << std::endl;
+
+	/*int timeStep = 10;
+	Explore myEXP;
+
+	myEXP.runFor(timeStep);
+	std::cout << myEXP.getActivity() << std::endl;
+
+	myEXP.updateA(0.1);
+
+	myEXP.runFor(timeStep);
+	std::cout << myEXP.getActivity() << std::endl;*/
+
+	int timeStep = 10;
+	Memory myMEM;
+	myMEM.runFor(timeStep);
+	std::cout << myMEM.getActivity() << std::endl;
 
 	return 0;
 }
+
+
 
 //cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
 //

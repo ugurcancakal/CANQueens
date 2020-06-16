@@ -24,6 +24,14 @@ void Value::update(int* chromosome) {
     std::cout << fitness(chromosome) << std::endl;
 }
 
+float Value::activity(int n, int* chromosome) {
+    return (fitness(chromosome)*1.0f) / (maxCollision(n)*1.0f);
+}
+
+int Value::maxCollision(int n) {
+    return ((n * (n - 1)) / 2);
+}
+
 int Value::fitness(int* chromosome) {
     // KONTROL ET
     /*int collision = 0;

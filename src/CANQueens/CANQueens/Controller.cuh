@@ -25,6 +25,7 @@
 class Controller {
 private:
 
+    int n_neuron;
     Board* board;
     Value* value;
     Explore* explore;

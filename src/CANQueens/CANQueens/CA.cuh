@@ -20,6 +20,13 @@
 #include <fstream>
 #include <time.h>
 
+struct record {
+    std::vector<bool> flags;
+    std::vector<std::vector<float>> weights;
+    std::vector<float> energy;
+    std::vector<float> fatigue;
+};
+
 class CA {
 
 private:
@@ -42,7 +49,8 @@ protected:
 
     //activityRecord[timeStep][n_id]
     std::vector<std::vector<bool>> activityRecord; 
-    
+    std::vector<record> activity;
+
     // Constant Parameters
     float theta; // firing threshold
     float c_decay; // decay constant d
@@ -67,13 +75,24 @@ protected:
     void updateWeights();
 
     // Inits
-    void initWeights(float connectivity, bool print);
-    void initFlags();
+    void initWeights(int n, float connectivity, bool print);
+    void initFlags(int n);
 
     //Methods
     float dotP(std::vector<float>& weight, std::vector<bool>& flag);
     int num_fire(std::vector<bool>& firings);
     std::string dateTimeStamp(const char* filename);
+
+
+    template <typename T>
+    std::string vectorToString(std::vector<T>& vec) {
+        std::string temp = "";
+        typename std::vector<T>::iterator it;
+        for (it = vec.begin(); it < vec.end(); it++) {
+            temp += std::to_string(*it) + " ";
+        }
+        return temp;
+    }
 
 public:
     // Constructors - Destructors
@@ -93,6 +112,9 @@ public:
     std::string toString(int timeStep);
     std::string getRaster(int timeStep);
     void saveRaster(char* filename, int timeStep);
+
+    std::string getActivity(int timeStep = 0);
+    void saveActivity(char* filename, int timeStep);
 
     // GET
     bool getIgnition();

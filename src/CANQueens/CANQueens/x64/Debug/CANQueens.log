@@ -1,10 +1,12 @@
-﻿  Compiling CUDA source file main.cu...
+﻿  Compiling CUDA source file Memory.cu...
   
-  C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\bin\HostX86\x64" -x cu  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\main.cu.obj "C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\main.cu" 
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/main.cu(89): warning : conversion from a string literal to "char *" is deprecated
+  C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\bin\HostX86\x64" -x cu  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\Memory.cu.obj "C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Memory.cu" 
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Memory.cu(64): warning : unrecognized character escape sequence
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/main.cu(89): warning : conversion from a string literal to "char *" is deprecated
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Memory.cu(64): warning : unrecognized character escape sequence
   
-  main.cu
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/main.cu(19): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  Memory.cu
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Memory.cu(34): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Memory.cu(196): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Memory.cu(223): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   CANQueens.vcxproj -> C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\x64\Debug\CANQueens.exe
