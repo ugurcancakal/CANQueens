@@ -78,6 +78,7 @@ public:
 
     // Printing
     std::string getRecord(int timeStep);
+    std::string getActivity(int start, int stop);
     std::string getRaster(int start, int stop, float threshold = 0.0f);
     void saveRecord(char* filename, int start, int stop, float threshold = 0.0f);
 

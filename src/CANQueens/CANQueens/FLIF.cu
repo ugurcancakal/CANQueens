@@ -291,9 +291,58 @@ std::string FLIF::getRecord(int timeStep) {
     temp += "\n";
 }
 
+std::string FLIF::getActivity(int start, int stop) {
+
+    recSize rec = sizeCheckRecord(start, stop);
+    start = rec.start;
+    stop = rec.stop;
+    // Size Check
+    if (!rec.check) {
+        std::cout << "Activity cannot be shown!" << std::endl;
+        return;
+    }
+
+    std::string temp = "\n";
+    temp += "CA ID: " + std::to_string(getID()) + "\n\n";
+
+    for (int i = start; i < stop; i++) {
+        temp+=  getRecord(i) + "\n";
+    }
+
+}
+
 
 std::string FLIF::getRaster(int start, int stop, float threshold) {
-   // threshold varsa ignit gozukur
+    /* Construct the string representing whole raster plot
+     * for given time interval.
+     *
+     *  N_ID    ||         SPIKE ACTIVITY
+     *  --------------------------------------------
+     *  0       ||      |
+     *  1       ||      |               |
+     *  2       ||      |                       |
+     *  3       ||
+     *  --------------------------------------------
+     *  TIME    ||      0       1       2       3
+     *  --------------------------------------------
+     *  FIRE    ||      2       0       1       1
+     *  --------------------------------------------
+     *  IGNIT   ||      1       0       1       1
+     *
+     * Parameters:
+     *      start(int):
+     *          starting timestep
+     *      stop(int):
+     *          ending timestep
+     *      threshold(float):
+     *          minimum rate of firing to ignit (0 by default)
+     *          to show the ignit line, it must be greater than 0.
+     *
+     * Returns:
+     *      raster(std::string):
+     *          raster plot
+     */
+
     int range = stop - start;
     std::string temp = "\n";
     int n_threshold = threshold * n_neuron;
@@ -301,6 +350,7 @@ std::string FLIF::getRaster(int start, int stop, float threshold) {
     recSize rec = sizeCheckRecord(start, stop);
     start = rec.start;
     stop = rec.stop;
+
     // Size Check
     if (!rec.check) {
         std::cout << "Raster cannot be plotted!" << std::endl;
@@ -360,6 +410,22 @@ std::string FLIF::getRaster(int start, int stop, float threshold) {
 }
 
 void FLIF::saveRecord(char* filename, int start, int stop, float threshold) {
+    /* Save the record and the raster plot constructed by 
+     * getRaster() and getRecord() recursively
+     * to a .txt file, into ./test/ folder.
+     *
+     * Parameters:
+     *      filename(char*):
+     *          filename to be stamped then used
+     *      start(int):
+     *          starting timestep
+     *      stop(int):
+     *          ending timestep
+     *      threshold(float):
+     *          minimum rate of firing to ignit (0 by default)
+     *          to show the ignit line, it must be greater than 0.
+     */
+    
     std::string raster_name = "./test/raster_" + dateTimeStamp(filename) + ".txt";
     std::ofstream raster_file(raster_name, std::ofstream::out);
 
@@ -375,11 +441,17 @@ void FLIF::saveRecord(char* filename, int start, int stop, float threshold) {
         return;
     }
 
-    if (raster_file.is_open()) {
-        raster_file << getRaster(start, stop, threshold) << std::endl;
+    if (record[0].available | 0b0111 == 0b1111) {
+        std::cout << "No firing record available!" << std::endl
+            << "Raster cannot be plotted!" << std::endl;
     }
     else {
-        std::cout << "Raster file cannot open!" << std::endl;
+        if (raster_file.is_open()) {
+            raster_file << getRaster(start, stop, threshold) << std::endl;
+        }
+        else {
+            std::cout << "Raster file cannot open!" << std::endl;
+        }
     }
 
     if (record_file.is_open()) {
@@ -391,8 +463,6 @@ void FLIF::saveRecord(char* filename, int start, int stop, float threshold) {
         std::cout << "Record file cannot open!" << std::endl;
     }
 }
-
-
 
 
 int FLIF::getID(){
