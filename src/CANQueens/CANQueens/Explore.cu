@@ -12,7 +12,7 @@ float Explore::d_activity = 0.5f;
 int Explore::d_available = 0b1000;
 
 Explore::Explore(int n, float activity) {
-    std::cout << "Explore constructed" << std::endl;
+    //std::cout << "Explore constructed" << std::endl;
     this->n_neuron = n;
     this->activity = activity;
 
@@ -23,16 +23,6 @@ Explore::Explore(int n, float activity) {
 Explore::~Explore() {
     std::cout << "Explore destructed" << std::endl;
 }
-
-void Explore::updateFlags(std::vector<bool>& flag_vec,
-                          const float& activity) {
-
-    std::vector<bool>::iterator it;
-    for (it = flag_vec.begin(); it < flag_vec.end(); it++) {
-        *it = 0 == (rand() % static_cast<int>(floor(1.0f / activity)));
-    }
-}
-
 
 // Running
 void Explore::runFor(int timeStep, int available) {
@@ -51,11 +41,6 @@ void Explore::update(float act) {
         setActivity(act);
     }
     updateFlags(this -> flags, this -> activity);
-}
-
-// Set
-void Explore::setActivity(float act) {
-    this -> activity = act;
 }
 
 void Explore::POC() {

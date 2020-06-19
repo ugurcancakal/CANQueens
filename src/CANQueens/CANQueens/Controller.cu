@@ -8,8 +8,8 @@
 #include "Controller.cuh"
 
 Controller::Controller(int n) {
-    std::cout << "Controller constructed" << std::endl
-              << "Welcome to CANQueens Project" << std::endl;
+    //std::cout << "Controller constructed" << std::endl
+    //          << "Welcome to CANQueens Project" << std::endl;
 
     srand(time(NULL));
 
@@ -20,9 +20,13 @@ Controller::Controller(int n) {
     explore = new Explore();
     memory = new Memory();
 
+    
     //value.connect(explore);
     //memory.connect(board);
-    
+
+    //SADECE CONNECTIONLAR KALDI
+    board->connect(memory);
+    board->connect(explore);
     
     //std::string temp = "\n";
     //for (int i = 0; i < n; i++) {
@@ -52,7 +56,7 @@ void Controller::step() {
     std::cout << explore->getActivity() << std::endl;
 
     // Update Memory
-    // memory->update();
+    memory->update();
 
     // Update Board
     board->update();

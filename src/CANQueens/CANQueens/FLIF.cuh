@@ -53,15 +53,17 @@ protected:
     std::vector<bool> flags; // firing flags phi
     std::vector<float> energy; // energy levels
     std::vector<float> fatigue; // fatigue levels
-    std::vector<std::vector<float>> weights; // connection weights weights[n_id][to_neuron]
+    std::vector<std::vector<float>> weights;
 
     // Inits
     void initFlags(int n, float activity,
         std::vector<bool>& flag_vec);
     void initEF(int n, float upper, float lower,
         std::vector<float>& EF_vec);
-    void initWeights(int in, int out, float connectivity, float inhibitory,
-        std::vector<std::vector<float>>& weight_vec);
+
+    // Updates
+    void updateFlags(std::vector<bool>& flag_vec,
+                     const float& activity);
 
     //Methods
     std::string dateTimeStamp(const char* filename);
@@ -71,7 +73,7 @@ protected:
 
     template <typename T>
     std::string vectorToString(std::vector<T>& vec);    
-
+    friend class Synapse;
 public:
     //Constructors
     FLIF();
@@ -86,6 +88,9 @@ public:
     // GET
     int getID();
     int getN();
+
+    // Set
+    void setActivity(float act);
 
     //CUDA_CALLABLE_MEMBER std::string toString();
 };

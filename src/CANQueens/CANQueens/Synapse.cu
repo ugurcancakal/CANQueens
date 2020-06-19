@@ -8,11 +8,16 @@
 #include "Synapse.cuh"
 
 Synapse::Synapse() {
-    std::cout << "Synapse constructed" << std::endl;
+    //std::cout << "Synapse constructed" << std::endl;
+    connectivity = 0.0f;
+    inhibitory = 0.0f;
+    alpha = 0.0f; // learning rate
+    w_average = 0.0f; // constant representing average total synaptic strength of the pre-synaptic neuron.
+    w_current = 0.0f; // current total synaptic strength
 }
 
 Synapse::~Synapse() {
-    std::cout << "Synapse destructed" << std::endl;
+    //std::cout << "Synapse destructed" << std::endl;
 }
 
 void Synapse::initWeights(int in, int out, float connectivity, float inhibitory, std::vector<std::vector<float>>& weight_vec) {
@@ -149,9 +154,9 @@ void Synapse::updateWeights(std::vector<std::vector<float>>& weight_vec,
 }
 
 void Synapse::updatePre(std::vector<bool>& pre_synaptic_flags,
-    const std::vector<Synapse*>& incoming)
+    const std::vector<FLIF*>& incoming)
 {
-    std::vector<Synapse*>::const_iterator it;
+    std::vector<FLIF*>::const_iterator it;
     std::vector<bool>::const_iterator it_f;
     pre_synaptic_flags.clear();
 
@@ -168,9 +173,9 @@ void Synapse::updatePre(std::vector<bool>& pre_synaptic_flags,
 }
 
 void Synapse::updatePost(std::vector<bool>& post_synaptic_flags,
-    const std::vector<Synapse*>& outgoing) {
+    const std::vector<FLIF*>& outgoing) {
 
-    std::vector<Synapse*>::const_iterator it;
+    std::vector<FLIF*>::const_iterator it;
     std::vector<bool>::const_iterator it_f;
     post_synaptic_flags.clear();
 
@@ -237,7 +242,7 @@ void Synapse::addOutgoingWeights(std::vector<std::vector<float>>& resting,
     }
 }
 
-void Synapse::connectIn(Synapse* incoming,
+void Synapse::connectIn(FLIF* incoming,
     float strength,
     float inhibitory) {
 
@@ -247,7 +252,7 @@ void Synapse::connectIn(Synapse* incoming,
     addIncomingWeights(this->weights, inWeights);
 }
 
-void Synapse::connectOut(Synapse* outgoing,
+void Synapse::connectOut(FLIF* outgoing,
     float strength,
     float inhibitory) {
 
@@ -261,5 +266,4 @@ void Synapse::connect(Synapse* pre_synaptic, float pre_strength, float pre_inhib
     Synapse* post_synaptic, float post_strength, float post_inhibitory) {
     post_synaptic->connectIn(pre_synaptic, pre_strength, pre_inhibitory);
     pre_synaptic->connectOut(post_synaptic, post_strength, post_inhibitory);
-    (post_synaptic->pre_flags).resize(7);
 }

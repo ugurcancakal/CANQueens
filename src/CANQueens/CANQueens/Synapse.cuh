@@ -27,12 +27,11 @@ protected:
     float w_current; // current total synaptic strength
 
     // Synapse ==== FLIF
-    std::vector<std::vector<float>> weights;
     std::vector<bool> pre_flags;
     std::vector<bool> post_flags;
 
-    std::vector<Synapse*> incomingList;
-    std::vector<Synapse*> outgoingList;
+    std::vector<FLIF*> incomingList;
+    std::vector<FLIF*> outgoingList;
 
     // Init === FLIF
     void initWeights(int in, int out, float connectivity, float inhibitory,
@@ -47,28 +46,29 @@ protected:
         const float& w_current);
 
     void updatePre(std::vector<bool>& pre_synaptic_flags,
-        const std::vector<Synapse*>& incoming);
+        const std::vector<FLIF*>& incoming);
 
     void updatePost(std::vector<bool>& post_synaptic_flags,
-        const std::vector<Synapse*>& outgoing);
+        const std::vector<FLIF*>& outgoing);
 
     // Connect
     void addIncomingWeights(std::vector<std::vector<float>>& resting,
         const std::vector<std::vector<float>>& in);
     void addOutgoingWeights(std::vector<std::vector<float>>& resting,
         const std::vector<std::vector<float>>& out);
-    void connectIn(Synapse* incoming,
-        float strength,
-        float inhibitory);
-    void connectOut(Synapse* outgoing,
-        float strength,
-        float inhibitory);
+    
 
 public:
     Synapse();
     ~Synapse();
 
     // Connecting
+    void connectIn(FLIF* incoming,
+        float strength,
+        float inhibitory);
+    void connectOut(FLIF* outgoing,
+        float strength,
+        float inhibitory);
     static void connect(Synapse* pre_synaptic, float pre_strength, float pre_inhibitory,
                         Synapse* post_synaptic, float post_strength, float post_inhibitory);
 };

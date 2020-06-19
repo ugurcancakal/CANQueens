@@ -329,6 +329,16 @@ std::string Board::toString(PrintType type) {
     }
 }
 
+void Board::connect(FLIF* pre_synaptic, float inhibitory, float strength, float rate) {
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            if (0 == (rand() % static_cast<int>(floor(1.0f / rate)))) {
+                board[i][j].connectIn(pre_synaptic, strength, inhibitory);
+            }         
+        }
+    }
+}
+
 void Board::update() {
     /* Update each CA in the board.
      * Update policy is depended on each CA seperately.

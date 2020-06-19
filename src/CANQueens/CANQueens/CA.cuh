@@ -14,9 +14,9 @@
 #ifndef CA_H
 #define CA_H
 
-#include "FLIF.cuh"
+#include "Synapse.cuh"
 
-class CA : public FLIF{
+class CA : public Synapse{
 
 private:
     // Default values for CA intiation
@@ -36,20 +36,11 @@ protected:
     int n_activation;
     bool ignition;
 
-    std::vector<bool> pre_flags;
-    std::vector<bool> post_flags;
-
-    std::vector<CA*> incomingList;
-    std::vector<CA*> outgoingList;
-
     // Constant Parameters
     float theta; // firing threshold
     float c_decay; // decay constant d
     float f_recover; // recovery constant F^R
     float f_fatigue; // fatigue constant F^C
-    float alpha; // learning rate
-    float w_average; // constant representing average total synaptic strength of the pre-synaptic neuron.
-    float w_current; // current total synaptic strength
 
     // Updates
     void updateFlags(std::vector<bool>& flag_vec,
@@ -64,34 +55,10 @@ protected:
                  const std::vector<bool>& flag_vec,
                  const float& f_fatigue,
                  const float& f_recover);
-    void updateWeights(std::vector<std::vector<float>>& weight_vec,
-                       const std::vector<bool>& pre_vec,
-                       const std::vector<bool>& post_vec,
-                       const float& alpha,
-                       const float& w_average,
-                       const float& w_current);
-    void updatePre(std::vector<bool>& pre_synaptic_flags, 
-                   const std::vector<CA*>& incoming);
-
-    void updatePost(std::vector<bool>& post_synaptic_flags, 
-                    const std::vector<CA*>& outgoing);
 
     //Methods
     float dotP(const std::vector<float>& weights_vec,
                const std::vector<bool>& flags_vec);
-
-    // Connect
-    void addIncomingWeights(std::vector<std::vector<float>>& resting,
-                            const std::vector<std::vector<float>>& in);
-
-    void addOutgoingWeights(std::vector<std::vector<float>>& resting,
-                            const std::vector<std::vector<float>>& out);
-    void connectIn(CA* incoming,
-        float strength,
-        float inhibitory);
-    void connectOut(CA* outgoing,
-        float strength,
-        float inhibitory);
 
 public:
     // Constructors - Destructors
@@ -109,10 +76,6 @@ public:
 
     // GET
     bool getIgnition();
-
-    // Connecting
-    static void connect(CA* pre_synaptic, float pre_strength, float pre_inhibitory,
-                        CA* post_synaptic, float post_strength, float post_inhibitory);
 
     // Proof of Concept
     static void POC();

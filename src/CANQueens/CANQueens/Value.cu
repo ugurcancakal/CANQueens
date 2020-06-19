@@ -9,7 +9,7 @@
 
 Value::Value(int n) {
     row = n;
-    std::cout << "Value constructed" << std::endl;
+    //std::cout << "Value constructed" << std::endl;
 }
 
 Value::~Value() {

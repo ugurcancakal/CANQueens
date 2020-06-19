@@ -50,6 +50,7 @@ public:
     // Printing
     enum class PrintType { full, comp, chrom };
     std::string toString(PrintType type);
+    void connect(FLIF* pre_synaptic, float inhibitory = 0.0f, float strength = 1.0f, float rate = 1.0f);
 
     // Update
     void update();

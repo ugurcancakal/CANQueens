@@ -20,110 +20,21 @@ int main(int argc, char** argv) {
 	srand(time(0));
 
 	std::cout << "Welcome to CANQueens Project" << std::endl;
-
-	//for (int i = 0; i < 50; i++) {
-	//	CA myCA;
-	//	std::cout << myCA.getID() << std::endl;
-	//	std::cout << myCA.getIgnition() << std::endl;
-	//	std::cout << myCA.toString() << std::endl;
-	//}
-
-
-	//FLIF myFLIF;
-	//std::cout << myFLIF.toString() << std::endl;
-
-	//int n = 8;
-	//int* chromosome;
-	//Board myBoard(n);
-	//CA** board = myBoard.getBoard();
-	//std::cout << board[2][3].getID() << std::endl;
-	//std::cout << myBoard.toString(Board::PrintType::chrom) << std::endl;
-	//std::cout << myBoard.toString(Board::PrintType::comp) << std::endl;
-	//std::cout << myBoard.toString(Board::PrintType::full) << std::endl;
 	
 	// 202605 ONEMLI
 	// 3 bit olursa ama n = 8 olmazsa yasakli bitleri belirlemek gerek
 	// Cok buyuk ceza verilebilir
 	// Modulo falan olabilir
-	//chromosome = myBoard.getChromosome();
-	//std::string temp = "\n";
-	//for (int i = 0; i < n; i++) {
-	//	temp += std::to_string(i) + "| " + std::to_string(chromosome[i]) + " |\n";
-	//}
-	//std::cout << temp << std::endl;
-
-	//Memory myMemory;
-	//std::cout << myMemory.toString() << std::endl;
-	//int k = 5;
-	//Value myValue(k);
-	//int* chromosome = new int[k];
-	//chromosome[0] = 3;
-	//chromosome[1] = 1;
-	//chromosome[2] = 4;
-	//chromosome[3] = 0;
-	//chromosome[4] = 3;
-	//Value myValue(n);
-	//std::cout << myValue.toString() << std::endl;
-	//myValue.update(chromosome);
-
-	//Explore myExplore;
-	//std::cout << myExplore.toString() << std::endl;
-
-	//Chromosome myChromosome;
-	//std::cout << myChromosome.toString() << std::endl;
-
-	//200612
-
-	/*for (int i = 0; i < 50; i++) {
-		CA myCA;
-		std::cout << myCA.getID() << std::endl;
-		std::cout << myCA.getIgnition() << std::endl;
-		std::cout << myCA.toString() << std::endl;
-	}*/
-
-
-	//int timeStep = 10;
-	//CA myCA(10);
-
-	//myCA.runFor(timeStep);
-	//std::cout << myCA.getRaster() << std::endl;
-
-	//myCA.runFor(5);
-	//std::cout << myCA.getActivity() << std::endl;
-
-	//myCA.saveRecord("rast");
-
-	//int n = 8;
-
-	//Controller myController(n);
-	//myController.runFor(10);
-
-	//int max = maxCollision(n);
-
-	//std::cout << max << std::endl;
-
-	/*int timeStep = 10;
-	Explore myEXP;
-
-	myEXP.runFor(timeStep);
-	std::cout << myEXP.getActivity() << std::endl;
-
-	myEXP.updateA(0.1);
-
-	myEXP.runFor(timeStep);
-	std::cout << myEXP.getActivity() << std::endl;*/
-
-	/*int timeStep = 10;
-	Memory myMEM;
-	myMEM.runFor(timeStep);
-	std::cout << myMEM.getActivity() << std::endl;*/
-
-	//myCA1.connect(myCA2);
 
 	// 200619
-	//CA::POC();
-	//Explore::POC();
-	Memory::POC();
+	// CA::POC();
+	// Explore::POC();
+	// Memory::POC();
+
+	int n = 8;
+	Controller myController(n);
+	myController.runFor(10);
+	
 
 	return 0;
 }

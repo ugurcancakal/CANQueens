@@ -27,12 +27,11 @@ void FLIF::initFlags(int n, float activity, std::vector<bool>& flag_vec) {
      *      flag_vec(std::vector<bool>&):
      *          reference to flag vector to be filled.
      */
-    int n_activation = floor(1.0f / activity);
     std::vector<bool>::iterator it;
     flag_vec.resize(n);
     
     for (it = flag_vec.begin(); it < flag_vec.end(); it++) {
-        *it = (0 == (rand() % n_activation));
+        *it = (0 == (rand() % static_cast<int>(floor(1.0f / activity))));
     }
 }
 
@@ -61,82 +60,13 @@ void FLIF::initEF(int n, float upper, float lower, std::vector<float>& EF_vec) {
     }
 }
 
+// Updates
+void FLIF::updateFlags(std::vector<bool>& flag_vec,
+    const float& activity) {
 
-void FLIF::initWeights(int in, int out, float connectivity, float inhibitory, std::vector<std::vector<float>>& weight_vec) {
-    /* Initialize neuron weights randomly
-     * Sign of the weigth is determined by the inhibitory neuron rate
-     *
-     * An example connection map: (10x10, 0.2 inhibitory, 1.0 connectivity)
-     * -------------------
-     * | - - + + + + + + | <-- incoming line
-     * | - - + + + + + + |
-     * | - - + + + + + + |
-     * | - - + + + + + + |
-     * | - - + + + + + + |
-     * | - - + + + + + + |
-     * | - - + + + + + + |
-     * | - - + + + + + + |
-     * -------------------
-     * 0<w<1
-     *
-     * Parameters:
-     *      in(int):
-     *          incoming connections. in = 10 creates 10 rows
-     *      out(int):
-     *          outgoing connections. out = 10 creates 10 columns
-     *      connectivity(float):
-     *          connectivity ratio inside network.
-     *          1.0 means fully connected.
-     *      inhibitory(float):
-     *          inhibitory neuron rate inside network.
-     *          1.0 full inhibitory and 0.0 means full excitatory.
-     *      weight_vec(std::vector<std::vector<float>>&):
-     *          reference to weight vector to be filled.
-     */
-    int n_inh;
-    if (inhibitory > 0) {
-        n_inh = floor(1.0f / inhibitory);
-    }
-    else {
-        n_inh = -1;
-    }
-    float sign = -1.0f;
-    weight_vec.resize(in);
-    std::vector<std::vector<float>>::iterator it;
-    for (it = weight_vec.begin(); it < weight_vec.end(); it++) {
-        (*it).resize(out);
-    }
-
-    // Connectivity range check
-    if (connectivity < 0.0f) {
-        connectivity = 0.0f;
-    }
-    else if (connectivity > 1.0f) {
-        connectivity = 1.0f;
-    }
-
-    // Iterators
-    std::vector<std::vector<float>>::iterator it_w;
-    std::vector<float>::iterator it_weight;
-    int counter = 0;
-
-    for (it_w = weight_vec.begin(); it_w < weight_vec.end(); it_w++) {
-        for (it_weight = (*it_w).begin(); it_weight < (*it_w).end(); it_weight++) {
-            if (n_inh > 0) {
-                sign = (rand() % n_inh) == 0 ? -1.0f : 1.0f;
-            }
-            else {
-                sign = 1.0f;
-            }
-            if (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) < connectivity) {
-                *it_weight = sign * static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-            }
-            else {
-                *it_weight = 0.0f;
-            }
-            counter++;
-        }
-        counter = 0;
+    std::vector<bool>::iterator it;
+    for (it = flag_vec.begin(); it < flag_vec.end(); it++) {
+        *it = 0 == (rand() % static_cast<int>(floor(1.0f / activity)));
     }
 }
 
@@ -525,4 +455,9 @@ int FLIF::getN(){
      *          Number of neurons inside network
      */
     return n_neuron;
+}
+
+// Set
+void FLIF::setActivity(float act) {
+    this->activity = act;
 }

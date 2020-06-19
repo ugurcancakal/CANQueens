@@ -20,13 +20,7 @@ class Explore : public FLIF{
 private:
     static int d_n_neuron;
     static float d_activity;
-    static int d_available;
-
-protected:    
-
-    // Updates
-    void updateFlags(std::vector<bool>& flag_vec,
-                     const float& activity);
+    static int d_available;    
 
 public:
     Explore(int n = d_n_neuron,
@@ -36,9 +30,6 @@ public:
     // Running
     void runFor(int timeStep, int available = d_available);
     void update(float act = -1.0f);
-
-    // Set
-    void setActivity(float act);
     
     // Proof of Concept
     static void POC();
