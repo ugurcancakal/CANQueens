@@ -49,7 +49,7 @@ void Controller::step() {
     // Update Explore
     float act = value->activity(n_neuron, chromosome);
     explore->update(act);
-    std::cout << explore->toString() << std::endl;
+    std::cout << explore->getActivity() << std::endl;
 
     // Update Memory
     // memory->update();

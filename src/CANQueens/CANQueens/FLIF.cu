@@ -101,9 +101,9 @@ void FLIF::initWeights(int in, int out, float connectivity, float inhibitory, st
         n_inh = -1;
     }
     float sign = -1.0f;
-    weight.resize(in);
+    weight_vec.resize(in);
     std::vector<std::vector<float>>::iterator it;
-    for (it = weight.begin(); it < weight.end(); it++) {
+    for (it = weight_vec.begin(); it < weight_vec.end(); it++) {
         (*it).resize(out);
     }
 
@@ -120,7 +120,7 @@ void FLIF::initWeights(int in, int out, float connectivity, float inhibitory, st
     std::vector<float>::iterator it_weight;
     int counter = 0;
 
-    for (it_w = weight.begin(); it_w < weight.end(); it_w++) {
+    for (it_w = weight_vec.begin(); it_w < weight_vec.end(); it_w++) {
         for (it_weight = (*it_w).begin(); it_weight < (*it_w).end(); it_weight++) {
             if (n_inh > 0) {
                 sign = (rand() % n_inh) == 0 ? -1.0f : 1.0f;
@@ -186,10 +186,11 @@ int FLIF::num_fire(std::vector<bool>& firings) {
     return fire;
 }
 
-recSize FLIF::sizeCheckRecord(int start, int stop) {
-    recSize temp;
+REC_SIZE FLIF::sizeCheckRecord(int stop, int start) {
+    REC_SIZE temp;
     temp.check = true;
-
+    //std::cout << "SIZE CHECK" << std::endl;
+    //std::cout << record[0].energy.size() << std::endl;
     int range = stop - start;
     if (start < 0) {
         std::cout << "Starting point cannot be less than 0!" << std::endl;
@@ -228,6 +229,31 @@ recSize FLIF::sizeCheckRecord(int start, int stop) {
     return temp;
 }
 
+REC FLIF::setRecord(int available) {
+    REC temp;
+    temp.available = available;
+    if ((available | 0b0111) == 0b1111) {
+        //std::cout << (this->flags).size() << std::endl;
+        temp.flags = this->flags;
+    }
+
+    if ((available | 0b1011) == 0b1111) {
+        //std::cout << "rec2" << std::endl;
+        temp.energy = this->energy;
+    }
+
+    if ((available | 0b1101) == 0b1111) {
+        //std::cout << "rec3" << std::endl;
+        temp.fatigue = this->fatigue;
+    }
+
+    if ((available | 0b1110) == 0b1111) {
+        //std::cout << "rec4" << std::endl;
+        temp.weights = this->weights;
+    }
+    
+    return temp;
+}
 
 template<typename T>
 std::string FLIF::vectorToString(std::vector<T>& vec) {
@@ -243,7 +269,7 @@ std::string FLIF::vectorToString(std::vector<T>& vec) {
      *          string form of the vector
      */
     std::string temp = "";
-    typename std::vector<U>::iterator it;
+    typename std::vector<T>::iterator it;
     for (it = vec.begin(); it < vec.end(); it++) {
         temp += std::to_string(*it) + " ";
     }
@@ -254,34 +280,38 @@ std::string FLIF::vectorToString(std::vector<T>& vec) {
 
 FLIF::FLIF() {
     ID = ++nextID;
+    n_neuron = 0;
+    activity = 0.0f;
+    connectivity = 0.0f;
+    inhibitory = 0.0f;
 }
-
 
 FLIF::~FLIF() {
 }
-
 
 std::string FLIF::getRecord(int timeStep) {
     std::string temp = "\n";
 
     temp += "timeStep " + std::to_string(timeStep) + "\n";
 
-    if (record[timeStep].available | 0b0111 == 0b1111) {
-        temp += "\nFlags \n";
+    if ((record[timeStep].available | 0b0111) == 0b1111) {
+        temp += "\nFlags ["+ std::to_string(activity) +"] : ";
+        temp += "(" + std::to_string(num_fire(record[timeStep].flags)) +
+            "/" + std::to_string(n_neuron) + ")\n";
         temp += vectorToString<bool>(record[timeStep].flags);
     }
     
-    if (record[timeStep].available | 0b1011 == 0b1111) {
+    if ((record[timeStep].available | 0b1011) == 0b1111) {
         temp += "\n\nEnergy Levels \n";
         temp += vectorToString<float>(record[timeStep].energy);
     }
     
-    if (record[timeStep].available | 0b1101 == 0b1111) {
+    if ((record[timeStep].available | 0b1101) == 0b1111) {
         temp += "\n\nFatigue Levels \n";
         temp += vectorToString<float>(record[timeStep].fatigue);
     }
 
-    if (record[timeStep].available | 0b1110 == 0b1111) {
+    if ((record[timeStep].available | 0b1110) == 0b1111) {
         temp += "\n\nWeights \n";
         std::vector<std::vector<float>>::iterator it_w;
         for (it_w = record[timeStep].weights.begin(); it_w < record[timeStep].weights.end(); it_w++) {
@@ -289,30 +319,36 @@ std::string FLIF::getRecord(int timeStep) {
         }
     }
     temp += "\n";
+    return temp;
 }
 
-std::string FLIF::getActivity(int start, int stop) {
+std::string FLIF::getActivity(int stop, int start) {
 
-    recSize rec = sizeCheckRecord(start, stop);
+    if (stop == -1) {
+        stop = record.size();
+    }
+
+    REC_SIZE rec = sizeCheckRecord(stop, start);
     start = rec.start;
     stop = rec.stop;
     // Size Check
     if (!rec.check) {
         std::cout << "Activity cannot be shown!" << std::endl;
-        return;
+        return "NA";
     }
 
     std::string temp = "\n";
-    temp += "CA ID: " + std::to_string(getID()) + "\n\n";
+    temp += "CA ID: " + std::to_string(getID()) + "\n";
 
     for (int i = start; i < stop; i++) {
         temp+=  getRecord(i) + "\n";
     }
 
+    return temp;
+
 }
 
-
-std::string FLIF::getRaster(int start, int stop, float threshold) {
+std::string FLIF::getRaster(float threshold, int stop, int start) {
     /* Construct the string representing whole raster plot
      * for given time interval.
      *
@@ -342,25 +378,28 @@ std::string FLIF::getRaster(int start, int stop, float threshold) {
      *      raster(std::string):
      *          raster plot
      */
+    if (stop == -1) {
+        stop = record.size();
+    }
 
     int range = stop - start;
     std::string temp = "\n";
     int n_threshold = threshold * n_neuron;
     
-    recSize rec = sizeCheckRecord(start, stop);
+    REC_SIZE rec = sizeCheckRecord(stop, start);
     start = rec.start;
     stop = rec.stop;
 
     // Size Check
     if (!rec.check) {
         std::cout << "Raster cannot be plotted!" << std::endl;
-        return;
+        return "NA";
     }
 
-    if (record[0].available | 0b0111 == 0b1111) {
+    if ((record[0].available | 0b0111) != 0b1111) {
         std::cout << "No firing record available!" << std::endl
             << "Raster cannot be plotted!" << std::endl;
-        return;
+        return "NA";
     }
 
     // Header
@@ -409,7 +448,7 @@ std::string FLIF::getRaster(int start, int stop, float threshold) {
     return temp;
 }
 
-void FLIF::saveRecord(char* filename, int start, int stop, float threshold) {
+void FLIF::saveRecord(char* filename, float threshold, int stop, int start) {
     /* Save the record and the raster plot constructed by 
      * getRaster() and getRecord() recursively
      * to a .txt file, into ./test/ folder.
@@ -432,7 +471,11 @@ void FLIF::saveRecord(char* filename, int start, int stop, float threshold) {
     std::string record_name = "./test/record_" + dateTimeStamp(filename) + ".txt";
     std::ofstream record_file(record_name, std::ofstream::out);
 
-    recSize rec = sizeCheckRecord(start, stop);
+    if (stop == -1) {
+        stop = record.size();
+    }
+
+    REC_SIZE rec = sizeCheckRecord(stop, start);
     start = rec.start;
     stop = rec.stop;
     // Size Check
@@ -441,13 +484,13 @@ void FLIF::saveRecord(char* filename, int start, int stop, float threshold) {
         return;
     }
 
-    if (record[0].available | 0b0111 == 0b1111) {
+    if ((record[0].available | 0b0111) != 0b1111) {
         std::cout << "No firing record available!" << std::endl
             << "Raster cannot be plotted!" << std::endl;
     }
     else {
         if (raster_file.is_open()) {
-            raster_file << getRaster(start, stop, threshold) << std::endl;
+            raster_file << getRaster(threshold, stop, start) << std::endl;
         }
         else {
             std::cout << "Raster file cannot open!" << std::endl;
@@ -464,7 +507,6 @@ void FLIF::saveRecord(char* filename, int start, int stop, float threshold) {
     }
 }
 
-
 int FLIF::getID(){
     /* ID getter
      *
@@ -474,7 +516,6 @@ int FLIF::getID(){
      */
     return ID;
 }
-
 
 int FLIF::getN(){
     /* n_neuron getter

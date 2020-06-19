@@ -21,7 +21,7 @@
 #include <fstream>
 #include <time.h>
 
-struct rec {
+struct REC {
     // 0000 represent none 1111 all 0101 energy and weights
     int available; 
     std::vector<bool> flags;
@@ -30,7 +30,7 @@ struct rec {
     std::vector<std::vector<float>> weights;
 };
 
-struct recSize {
+struct REC_SIZE {
     int start;
     int stop;
     bool check;
@@ -40,20 +40,20 @@ class FLIF {
 
 protected:
     static int nextID;
-
     int ID;
+
     int n_neuron;
     float activity;
     float connectivity;
     float inhibitory;
 
-    std::vector<rec> record;
+    std::vector<REC> record;
 
     // Neurons
-    //std::vector<bool> flags; // firing flags phi
-    //std::vector<float> energy; // energy levels
-    //std::vector<float> fatigue; // fatigue levels
-    //std::vector<std::vector<float>> weights; // connection weights weights[n_id][to_neuron]
+    std::vector<bool> flags; // firing flags phi
+    std::vector<float> energy; // energy levels
+    std::vector<float> fatigue; // fatigue levels
+    std::vector<std::vector<float>> weights; // connection weights weights[n_id][to_neuron]
 
     // Inits
     void initFlags(int n, float activity,
@@ -66,7 +66,8 @@ protected:
     //Methods
     std::string dateTimeStamp(const char* filename);
     int num_fire(std::vector<bool>& firings);
-    recSize sizeCheckRecord(int start, int stop);
+    REC_SIZE sizeCheckRecord(int stop, int start);
+    REC setRecord(int available);
 
     template <typename T>
     std::string vectorToString(std::vector<T>& vec);    
@@ -78,9 +79,9 @@ public:
 
     // Printing
     std::string getRecord(int timeStep);
-    std::string getActivity(int start, int stop);
-    std::string getRaster(int start, int stop, float threshold = 0.0f);
-    void saveRecord(char* filename, int start, int stop, float threshold = 0.0f);
+    std::string getActivity(int stop = -1, int start = 0);
+    std::string getRaster(float threshold = 0.0f, int stop = -1, int start = 0);
+    void saveRecord(char* filename, float threshold = 0.0f, int stop = -1, int start = 0);
 
     // GET
     int getID();

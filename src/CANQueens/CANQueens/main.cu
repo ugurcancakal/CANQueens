@@ -86,12 +86,12 @@ int main(int argc, char** argv) {
 	//CA myCA(10);
 
 	//myCA.runFor(timeStep);
-	//std::cout << myCA.getRaster(timeStep) << std::endl;
+	//std::cout << myCA.getRaster() << std::endl;
 
-	////myCA.runFor(5);
+	//myCA.runFor(5);
 	//std::cout << myCA.getActivity() << std::endl;
 
-	//myCA.saveRaster("rast", timeStep);
+	//myCA.saveRecord("rast");
 
 	//int n = 8;
 
@@ -118,30 +118,12 @@ int main(int argc, char** argv) {
 	myMEM.runFor(timeStep);
 	std::cout << myMEM.getActivity() << std::endl;*/
 
-	CA* myCA1;
-	CA* myCA2;
-	CA* myCA3;
-
-	myCA1 = new CA(3);
-	myCA2 = new CA(4);
-	myCA3 = new CA(5);
-
-	myCA1 -> runFor(1);
-	myCA2 -> runFor(1);
-	myCA3 -> runFor(1);
-
-	myCA1 -> connectIn(myCA2, 0.2, 0.0);
-	myCA1->connectOut(myCA3, 0.2, 0.0);
-
-	myCA1->runFor(1);
-	myCA2->runFor(1);
-	myCA3->runFor(1);
-
-	std::cout << myCA1 -> getActivity() << std::endl;
-	std::cout << myCA2 -> getActivity() << std::endl;
-	std::cout << myCA3->getActivity() << std::endl;
-
 	//myCA1.connect(myCA2);
+
+	// 200619
+	//CA::POC();
+	//Explore::POC();
+	Memory::POC();
 
 	return 0;
 }
