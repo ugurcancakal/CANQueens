@@ -84,6 +84,7 @@
     <CudaCompile Include="FLIF.cu" />
     <CudaCompile Include="main.cu" />
     <CudaCompile Include="Memory.cu" />
+    <CudaCompile Include="Synapse.cu" />
     <CudaCompile Include="Value.cu" />
   </ItemGroup>
   <ItemGroup>
@@ -93,6 +94,7 @@
     <ClInclude Include="Controller.cuh" />
     <ClInclude Include="FLIF.cuh" />
     <ClInclude Include="Memory.cuh" />
+    <ClInclude Include="Synapse.cuh" />
     <ClInclude Include="Value.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
