@@ -17,11 +17,13 @@
 #include <string>
 #include <iostream>
 #include <math.h>
-
+#include <vector>
 #include "CA.cuh"
 
 class Board {
 private:
+    static int history;
+protected:
     // Data
     int row; // n
     int col; // log2n
@@ -41,6 +43,7 @@ private:
 
     // Representation
     void boardToCh();
+    
 
 public:
     // Constructors - Destructors
@@ -54,9 +57,16 @@ public:
 
     // Update
     void update();
+    void runFor(int timeStep);
 
     // GET
     int* getChromosome();
+    std::string getInfo();
+    std::string getActivity(int stop = -1, int start = 0);
+    void saveCSV(char* filename, float threshold = 0.0f, int stop = -1, int start = 0);
+
+    // POC
+    static void POC();
 };
 
 #endif // BOARD_H

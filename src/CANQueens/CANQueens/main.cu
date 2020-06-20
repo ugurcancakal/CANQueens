@@ -11,8 +11,6 @@
 #include "Explore.cuh"
 #include "Value.cuh"
 
-
-
 int main(int argc, char** argv) {
 	/* Functions here are implemented to save the space in the main function.
 	 * In order to play with the parameters, please go to the related funciton definition.
@@ -27,13 +25,15 @@ int main(int argc, char** argv) {
 	// Modulo falan olabilir
 
 	// 200619
-	// CA::POC();
+	 //CA::POC();
 	// Explore::POC();
 	// Memory::POC();
+	 //Board::POC();
 
 	int n = 8;
 	Controller myController(n);
 	myController.runFor(10);
+	myController.saveLog();
 	
 
 	return 0;

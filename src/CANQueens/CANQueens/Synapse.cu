@@ -53,7 +53,7 @@ void Synapse::initWeights(int in, int out, float connectivity, float inhibitory,
      */
     int n_inh;
     if (inhibitory > 0) {
-        n_inh = floor(1.0f / inhibitory);
+        n_inh = static_cast<int>(floorf(1.0f / inhibitory));
     }
     else {
         n_inh = -1;

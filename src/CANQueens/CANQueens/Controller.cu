@@ -43,23 +43,30 @@ Controller::Controller(int n) {
 }
 
 void Controller::step() {
+    VAL temp;
     // Show Board
     std::cout << board->toString(Board::PrintType::full) << std::endl;
     std::cout << board->toString(Board::PrintType::chrom) << std::endl;
+    std::vector<int> chVec(board->getChromosome(), board->getChromosome() + n_neuron);
+    choromosomeRec.push_back(chVec);
     
     // Evaluate Board
-    std::cout << value->fitness(chromosome) << std::endl;
+    temp.fitness = value->fitness(chromosome);
+    std::cout << temp.fitness << std::endl;
 
     // Update Explore
-    float act = value->activity(n_neuron, chromosome);
-    explore->update(act);
-    std::cout << explore->getActivity() << std::endl;
+    temp.activity = value->activity(n_neuron, chromosome);
+
+    explore->setActivity(temp.activity);
+    explore->runFor(1);
+    //std::cout << explore->getActivity() << std::endl;
 
     // Update Memory
-    memory->update();
+    memory->runFor(1);
 
     // Update Board
-    board->update();
+    board->runFor(1);
+    valueRec.push_back(temp);
 }
 
 void Controller::runFor(int stepSize) {
@@ -75,3 +82,182 @@ Controller::~Controller() {
 std::string Controller::toString() {
     return "Controller";
 }
+
+std::string Controller::dateTimeStamp(const char* filename) {
+    /* Create an @ugurc format timestamp
+     * For example the date 09 May 1995 and time 02:48:05
+     * is encoded like year-month-day-hour-minute-second
+     * 950509024805
+     *
+     * Parameters:
+     *      filename (const char*):
+     *          filename to be concatenated with the timestamp
+     *
+     * Returns:
+     *		nameSTAMP(std::string):
+     *			name with a dateTimeStamp like ugurc950509024805
+     */
+
+    time_t t = time(0);   // get time now
+    struct tm* now = localtime(&t);
+    char buffer[80];
+    strftime(buffer, 80, "%y%m%d%H%M%S", now);
+    std::string dateTime = buffer;
+    return filename + dateTime;
+}
+
+void Controller::saveChCSV(char* filename, int stop, int start) {
+    std::string name = std::string(filename) + "_raster.csv";
+    std::ofstream file(name, std::ofstream::out);
+
+    if (stop == -1) {
+        stop = choromosomeRec.size();
+    }
+    if (file.is_open()) {
+        // Header
+        file << "ROW" << " , " << std::endl;
+        std::cout << choromosomeRec.size() << std::endl;
+        // Body
+        for (int i = 0; i < n_neuron; i++) {
+            file << i << " , ";
+            for (int j = start; j < stop; j++) {
+                file << choromosomeRec[j][i] << " , ";
+            }
+            file << " " << std::endl;
+        }
+        file << "TIME" << " , ";
+        for (int i = start; i < stop; i++) {
+            file << i << " , ";
+        }
+        file << std::endl << "Fitness" << " , ";
+        for (int i = start; i < stop; i++) {
+            file << valueRec[i].fitness << " , ";
+        }
+
+        file << std::endl << "Explore" << " , ";
+        for (int i = start; i < stop; i++) {
+            file << valueRec[i].activity << " , ";
+        }
+        file << std::endl;
+    }
+    else {
+        std::cout << "Chromosome file cannot open!" << std::endl;
+    }
+    file.close();
+
+}
+
+void Controller::saveValueCSV(char* filename, int stop, int start) {
+    if (stop == -1) {
+        stop = choromosomeRec.size();
+    }
+
+    std::string name = std::string(filename) + "_fitness.csv";
+    std::ofstream file(name, std::ofstream::out);
+    if (file.is_open()) {
+        file << "Time" << " , ";
+        for (int i = start; i < stop; i++) {
+            file << i << " , ";
+
+        }
+        file << std::endl << "Fitness" << " , ";
+        for (int i = start; i < stop; i++) {
+            file << valueRec[i].fitness << " , ";
+        }
+
+        file << std::endl << "Activity" << " , ";
+        for (int i = start; i < stop; i++) {
+            file << valueRec[i].activity << " , ";
+        }
+        file << std::endl;
+    }
+    else {
+        std::cout << "Value file cannot open!" << std::endl;
+    }
+    file.close();
+}
+
+void Controller::saveInfo(char* filename) {
+    std::string name = std::string(filename) + "_ugurc.txt";
+    std::ofstream file(name, std::ofstream::out);
+
+    if (file.is_open()) {
+        file << board->getInfo();
+        file << explore->getInfo();
+        file << memory->getInfo();
+        file << value->getInfo();
+    }
+    else {
+        std::cout << "Info file cannot open!" << std::endl;
+    }
+    file.close();
+}
+
+void Controller::saveLog() {
+    std::string base = "./log";
+    std::string logPath = base+"/" + dateTimeStamp("log");
+    std::string boardPath = logPath+"/board";
+    std::string explorePath = logPath +"/explore";
+    std::string memoryPath = logPath +"/memory";
+    std::string valuePath = logPath + "/value";
+    std::string temp;
+
+    if (CreateDirectory(base.c_str(), NULL) ||
+        ERROR_ALREADY_EXISTS == GetLastError()) {
+
+        if (CreateDirectory(logPath.c_str(), NULL) ||
+            ERROR_ALREADY_EXISTS == GetLastError()) {
+            temp = logPath + "/info";
+            saveInfo(strdup(temp.c_str()));
+
+            if (CreateDirectory(boardPath.c_str(), NULL) ||
+                ERROR_ALREADY_EXISTS == GetLastError()) {
+                board->saveCSV(strdup(boardPath.c_str()));
+                temp = boardPath + "/chromosome";
+                saveChCSV(strdup(temp.c_str()));
+            }
+            else {
+                std::cout << boardPath << " directory could not created!" << std::endl;
+            }
+
+            if (CreateDirectory(explorePath.c_str(), NULL) ||
+                ERROR_ALREADY_EXISTS == GetLastError()) {
+                temp = explorePath + "/explore_ID_" + std::to_string(explore->getID());
+                explore->saveCSV(strdup(temp.c_str()));
+            }
+            else {
+                std::cout << explorePath << " directory could not created!" << std::endl;
+            }
+
+            if (CreateDirectory(memoryPath.c_str(), NULL) ||
+                ERROR_ALREADY_EXISTS == GetLastError()) {
+                temp = memoryPath + "/memory_ID_" + std::to_string(memory->getID());
+                memory->saveCSV(strdup(temp.c_str()));
+
+            }
+            else {
+                std::cout << memoryPath << " directory could not created!" << std::endl;
+            }
+
+            if (CreateDirectory(valuePath.c_str(), NULL) ||
+                ERROR_ALREADY_EXISTS == GetLastError()) {
+                temp = valuePath + "/value";
+                saveValueCSV(strdup(temp.c_str()));
+            }
+            else {
+                std::cout << memoryPath << " directory could not created!" << std::endl;
+            }
+
+        }
+        else {
+            std::cout << logPath << " directory could not created!" << std::endl;
+        }
+
+    }
+    else {
+        std::cout << base << " directory could not created!" << std::endl;
+    }
+}
+
+
+

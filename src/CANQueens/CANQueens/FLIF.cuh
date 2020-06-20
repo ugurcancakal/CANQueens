@@ -20,6 +20,7 @@
 #include <vector>
 #include <fstream>
 #include <time.h>
+#include <windows.h>
 
 struct REC {
     // 0000 represent none 1111 all 0101 energy and weights
@@ -72,7 +73,13 @@ protected:
     REC setRecord(int available);
 
     template <typename T>
-    std::string vectorToString(std::vector<T>& vec);    
+    std::string vectorToString(const std::vector<T>& vec);    
+    template <typename T>
+    void vectorToCSV(std::ostream& file, const std::vector<T>& entry);
+
+    void getWeightCSV(char* filename, int stop, int start);
+   
+
     friend class Synapse;
 public:
     //Constructors
@@ -83,14 +90,19 @@ public:
     std::string getRecord(int timeStep);
     std::string getActivity(int stop = -1, int start = 0);
     std::string getRaster(float threshold = 0.0f, int stop = -1, int start = 0);
+    //void getRasterCSV(char* filename, float threshold = 0.0f, int stop = -1, int start = 0);
+    void getCSV(char* filename, int type, float threshold = 0.0f, int stop = -1, int start = 0);
     void saveRecord(char* filename, float threshold = 0.0f, int stop = -1, int start = 0);
+    void saveCSV(char* filename, float threshold = 0.0f, int stop = -1, int start = 0);
 
     // GET
     int getID();
     int getN();
+    std::string getInfo();
 
     // Set
     void setActivity(float act);
+    
 
     //CUDA_CALLABLE_MEMBER std::string toString();
 };

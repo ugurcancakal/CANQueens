@@ -226,11 +226,11 @@ CA::CA(int n,
     this->inhibitory = inhibitory;
 
     // CA Specific
-    n_threshold = ceil(n * threshold);
-    n_inhibitory = static_cast<int>(ceil(n * inhibitory));
-    n_excitatory = n - static_cast<int>(ceil(n * inhibitory));
-    n_activation = floor(1.0f / activity);
-    ignition = (0 == (rand() % static_cast<int>(floor(1.0f / activity))));
+    n_threshold = static_cast<int>(ceilf(n * threshold));
+    n_inhibitory = static_cast<int>(ceilf(n * inhibitory));
+    n_excitatory = n - static_cast<int>(ceilf(n * inhibitory));
+    n_activation = static_cast<int>(floorf(1.0f / activity));
+    ignition = (0 == (rand() % static_cast<int>(floorf(1.0f / activity))));
 
     // Constant Parameters
     theta = C[0]; // firing threshold
@@ -310,11 +310,11 @@ void CA::POC() {
     CA* myCA2;
     CA* myCA3;
 
-    myCA1 = new CA(3);
+    myCA1 = new CA(10);
     myCA2 = new CA(4);
     myCA3 = new CA(5);
 
-    myCA1->runFor(1);
+    myCA1->runFor(10);
     myCA2->runFor(1);
     myCA3->runFor(1);
 
@@ -329,4 +329,5 @@ void CA::POC() {
     std::cout << myCA1->getActivity() << std::endl;
     std::cout << myCA2->getActivity() << std::endl;
     std::cout << myCA3->getActivity() << std::endl;
+    myCA1->saveCSV("");
 }

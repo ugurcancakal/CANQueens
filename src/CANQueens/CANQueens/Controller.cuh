@@ -22,8 +22,13 @@
 #include "Memory.cuh"
 #include "Explore.cuh"
 
+struct VAL {
+    int fitness;
+    float activity;
+};
+
 class Controller {
-private:
+protected:
 
     int n_neuron;
     Board* board;
@@ -32,8 +37,16 @@ private:
     Memory* memory;
     int* chromosome;
 
+    std::vector<VAL> valueRec;
+    std::vector<std::vector<int>> choromosomeRec;
+
     void step();
     
+    //Methods
+    std::string dateTimeStamp(const char* filename);
+    void saveChCSV(char* filename, int stop = -1, int start = 0);
+    void saveValueCSV(char* filename, int stop = -1, int start = 0);
+    void saveInfo(char* filename);
 public:
     
     void runFor(int stepSize);
@@ -41,6 +54,8 @@ public:
     ~Controller();
     std::string toString();
     //CUDA_CALLABLE_MEMBER std::string toString();
+    void saveLog();
+
 };
 
 #endif // CONTROLLER_H

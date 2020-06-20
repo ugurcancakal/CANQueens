@@ -40,6 +40,7 @@
 
 #include "Board.cuh"
 
+int Board::history = 0;
 // PRIVATE MEMBERS
 // Initiation - Destruction
 
@@ -218,12 +219,14 @@ void Board::boardToCh() {
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
             if (board[i][j].getIgnition())
-                temp += pow(2, (col - j - 1));
+                temp += static_cast<int>(powf(2, (col - j - 1)));
         }
         chromosome[i] = temp;
         temp = 0;
     }
 }
+
+
 
 // PUBLIC MEMBERS
 // Constructors - Destructors
@@ -250,7 +253,7 @@ Board::Board(int n) {
      */
 
     row = n; 
-    col = n>1? ceil(log2(n)) : 1;
+    col = n>1? static_cast<int>(ceilf(log2(n))) : 1;
     board = initiateBoard(n, col);
     chromosome = initiateCh(n);
     boardToCh();
@@ -332,7 +335,7 @@ std::string Board::toString(PrintType type) {
 void Board::connect(FLIF* pre_synaptic, float inhibitory, float strength, float rate) {
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
-            if (0 == (rand() % static_cast<int>(floor(1.0f / rate)))) {
+            if (0 == (rand() % static_cast<int>(floorf(1.0f / rate)))) {
                 board[i][j].connectIn(pre_synaptic, strength, inhibitory);
             }         
         }
@@ -346,10 +349,23 @@ void Board::update() {
      */
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
-            board[i][j].update();
+            board[i][j].update();  
         }
     }
+    boardToCh(); 
+}
+
+void Board::runFor(int timeStep) {
+    for (int t = 0; t < timeStep; t++) {
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                board[i][j].runFor(1);
+            }
+        }
+        history++;
+    }
     boardToCh();
+    
 }
 
 // GET
@@ -363,5 +379,58 @@ int* Board::getChromosome() {
     return chromosome;
 }
 
+std::string Board::getInfo() {
+    return "HI\n";
+}
+
+std::string Board::getActivity(int stop, int start) {
+
+    std::string temp = "\n";
+    if (stop == -1) {
+        stop = history;
+    }
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            temp+= board[i][j].getActivity(stop, start);
+        }
+    }
+    
+    return temp;
+
+}
+
+void Board::saveCSV(char* filename, float threshold, int stop, int start) {
+    std::string ca = std::string(filename)+"/CA";
+    std::string temp;
+    if (CreateDirectory(ca.c_str(), NULL) ||
+        ERROR_ALREADY_EXISTS == GetLastError()) {
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                temp = ca + "/CA" + std::to_string(board[i][j].getID());
+                if (CreateDirectory(temp.c_str(), NULL) ||
+                    ERROR_ALREADY_EXISTS == GetLastError()) {
+                    temp+= "/CA_ID_" + std::to_string(board[i][j].getID());
+                    board[i][j].saveCSV(strdup(temp.c_str()), threshold, stop, start);
+                }
+                else {
+                    std::cout << temp << " directory could not created!" << std::endl;
+                }
+            }
+        }
+    }
+    else {
+        std::cout << ca << " directory could not created!" << std::endl;
+    }
+}
+
+
+void Board::POC() {
+    int timeStep = 10;
+    Board* board;
+    board = new Board(8);
+
+    board->runFor(timeStep);
+    std::cout << board->getActivity() << std::endl;
+}
 
 

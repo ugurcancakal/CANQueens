@@ -30,7 +30,7 @@ public:
 
     float activity(int n, int* chromosome);
     int maxCollision(int n);
-    
+    std::string getInfo();
     //CUDA_CALLABLE_MEMBER std::string toString();
 };
 

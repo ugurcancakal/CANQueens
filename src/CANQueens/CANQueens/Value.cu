@@ -32,6 +32,10 @@ int Value::maxCollision(int n) {
     return ((n * (n - 1)) / 2);
 }
 
+std::string Value::getInfo() {
+    return "HI\n";
+}
+
 int Value::fitness(int* chromosome) {
     // KONTROL ET
     /*int collision = 0;

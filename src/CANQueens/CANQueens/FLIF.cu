@@ -31,7 +31,7 @@ void FLIF::initFlags(int n, float activity, std::vector<bool>& flag_vec) {
     flag_vec.resize(n);
     
     for (it = flag_vec.begin(); it < flag_vec.end(); it++) {
-        *it = (0 == (rand() % static_cast<int>(floor(1.0f / activity))));
+        *it = (0 == (rand() % static_cast<int>(floorf(1.0f / activity))));
     }
 }
 
@@ -66,9 +66,10 @@ void FLIF::updateFlags(std::vector<bool>& flag_vec,
 
     std::vector<bool>::iterator it;
     for (it = flag_vec.begin(); it < flag_vec.end(); it++) {
-        *it = 0 == (rand() % static_cast<int>(floor(1.0f / activity)));
+        *it = 0 == (rand() % static_cast<int>(floorf(1.0f / activity)));
     }
 }
+
 
 // Methods
 
@@ -186,7 +187,7 @@ REC FLIF::setRecord(int available) {
 }
 
 template<typename T>
-std::string FLIF::vectorToString(std::vector<T>& vec) {
+std::string FLIF::vectorToString(const std::vector<T>& vec) {
     /* Convert a vector of U type to an std::string using
      * " " as delimiter.
      * 
@@ -199,11 +200,27 @@ std::string FLIF::vectorToString(std::vector<T>& vec) {
      *          string form of the vector
      */
     std::string temp = "";
-    typename std::vector<T>::iterator it;
+    typename std::vector<T>::const_iterator it;
     for (it = vec.begin(); it < vec.end(); it++) {
         temp += std::to_string(*it) + " ";
     }
     return temp;
+}
+
+template<typename T>
+void FLIF::vectorToCSV(std::ostream& file, const std::vector<T>& entry) {
+    typename std::vector<T>::const_iterator it;
+    bool start = true;
+    for (it = entry.begin(); it < entry.end(); it++) {
+        if (start) {
+            file << *it;
+            start = false;
+        }
+        else {
+            file << " , " << *it;
+        }
+    }
+    file << std::endl;
 }
 
 // Constructors
@@ -378,6 +395,190 @@ std::string FLIF::getRaster(float threshold, int stop, int start) {
     return temp;
 }
 
+//void FLIF::getRasterCSV(char* filename, float threshold, int stop, int start) {
+//    /* Construct the string representing whole raster plot
+//     * for given time interval.
+//     *
+//     *  N_ID    ||         SPIKE ACTIVITY
+//     *  --------------------------------------------
+//     *  0       ||      |
+//     *  1       ||      |               |
+//     *  2       ||      |                       |
+//     *  3       ||
+//     *  --------------------------------------------
+//     *  TIME    ||      0       1       2       3
+//     *  --------------------------------------------
+//     *  FIRE    ||      2       0       1       1
+//     *  --------------------------------------------
+//     *  IGNIT   ||      1       0       1       1
+//     *
+//     * Parameters:
+//     *      start(int):
+//     *          starting timestep
+//     *      stop(int):
+//     *          ending timestep
+//     *      threshold(float):
+//     *          minimum rate of firing to ignit (0 by default)
+//     *          to show the ignit line, it must be greater than 0.
+//     *
+//     * Returns:
+//     *      raster(std::string):
+//     *          raster plot
+//     */
+//    if (stop == -1) {
+//        stop = record.size();
+//    }
+//
+//    int range = stop - start;
+//    int n_threshold = threshold * n_neuron;
+//
+//    REC_SIZE rec = sizeCheckRecord(stop, start);
+//    start = rec.start;
+//    stop = rec.stop;
+//
+//    // Size Check
+//    if (!rec.check) {
+//        std::cout << "Raster cannot be plotted!" << std::endl;
+//        return ;
+//    }
+//
+//    if ((record[0].available | 0b0111) != 0b1111) {
+//        std::cout << "No firing record available!" << std::endl
+//            << "Raster cannot be plotted!" << std::endl;
+//        return ;
+//    }
+//
+//    // File
+//    std::string name = std::string(filename) + "_rasterID" +std::to_string(getID()) +".csv";
+//    std::ofstream file(name, std::ofstream::out);
+//
+//    if (file.is_open()) {
+//        // Header
+//
+//        file << "N_ID" << " , " << std::endl;
+//
+//        // Body
+//        for (int i = 0; i < n_neuron; i++) {
+//            file << i << " , ";
+//            for (int j = start; j < stop; j++) {
+//                if (record[j].flags[i]) {
+//                    file << "x" << " , ";
+//                }
+//                else {
+//                    file << " " << " , ";
+//                }
+//            }
+//            file << " " << std::endl;
+//        }
+//        file << "TIME" << " , ";
+//        for (int i = start; i < stop; i++) {
+//            file << i << " , ";
+//        }
+//        file << std::endl;
+//        file << "FIRE" << " , ";
+//        for (int i = start; i < stop; i++) {
+//            file << num_fire(record[i].flags) << " , ";
+//        }
+//        file << std::endl;
+//        if (threshold > 0.0f) {
+//            file << "IGNIT" << " , ";
+//            for (int i = start; i < stop; i++) {
+//                file << std::to_string(num_fire(record[i].flags) >= n_threshold) << " , ";
+//            }
+//        }
+//    }
+//    else {
+//        std::cout << "Raster CSV file cannot open!" << std::endl;
+//    }
+//    file.close();
+//
+//}
+
+void FLIF::getCSV(char* filename, int type, float threshold, int stop, int start) {
+
+    if (stop == -1) {
+        stop = record.size();
+    }
+
+    int range = stop - start;
+    int n_threshold = threshold * n_neuron;
+    REC_SIZE rec = sizeCheckRecord(stop, start);
+    start = rec.start;
+    stop = rec.stop;
+
+    // Size Check
+    if (!rec.check) {
+        std::cout << "EF cannot be plotted!" << std::endl;
+        return;
+    }
+
+    // File
+    std::string specifier = "specifier";
+    if (type == 0) {
+        specifier = "_raster";
+    }
+    if (type == 1) {
+        specifier = "_energy";
+    }
+    if (type == 2) {
+        specifier = "_fatigue";
+    }
+    std::string name = std::string(filename) + specifier + ".csv";
+    std::ofstream file(name, std::ofstream::out);
+
+    if (file.is_open()) {
+        // Header
+
+        file << "N_ID" << " , " << std::endl;
+
+        // Body
+        for (int i = 0; i < n_neuron; i++) {
+            file << i << " , ";
+            for (int j = start; j < stop; j++) {
+                if (type == 0) {
+                    if (record[j].flags[i]) {
+                        file << "x" << " , ";
+                    }
+                    else {
+                        file << " " << " , ";
+                    }
+                }
+                if (type == 1) {
+                    file << record[j].energy[i] << " , ";
+                }
+                else if (type == 2) {
+                    file << record[j].fatigue[i] << " , ";
+                }
+            }
+            file << " " << std::endl;
+        }
+        file << "TIME" << " , ";
+        for (int i = start; i < stop; i++) {
+            file << i << " , ";
+        }
+        file << std::endl;
+        if (type == 0) {
+            file << "FIRE" << " , ";
+            for (int i = start; i < stop; i++) {
+                file << num_fire(record[i].flags) << " , ";
+            }
+            file << std::endl;
+            if (threshold > 0.0f) {
+                file << "IGNIT" << " , ";
+                for (int i = start; i < stop; i++) {
+                    file << std::to_string(num_fire(record[i].flags) >= n_threshold) << " , ";
+                }
+            }
+        }
+        
+    }
+    else {
+        std::cout << "Type " << type << " file cannot open!" << std::endl;
+    }
+    file.close();
+
+}
+
 void FLIF::saveRecord(char* filename, float threshold, int stop, int start) {
     /* Save the record and the raster plot constructed by 
      * getRaster() and getRecord() recursively
@@ -425,15 +626,77 @@ void FLIF::saveRecord(char* filename, float threshold, int stop, int start) {
         else {
             std::cout << "Raster file cannot open!" << std::endl;
         }
+        raster_file.close();
     }
 
     if (record_file.is_open()) {
         for (int i = start; i < stop; i++) {
             record_file << getRecord(i) << std::endl;
         }
+        record_file.close();
     }
     else {
         std::cout << "Record file cannot open!" << std::endl;
+    }
+}
+
+void FLIF::getWeightCSV(char* filename, int stop, int start) {
+    std::string name = std::string(filename) + "_weight.csv";
+    std::vector <int> num;
+    std::vector<int>::iterator it_num;
+    int counter = 0;
+
+    std::ofstream file(name, std::ofstream::out);
+    std::vector<std::vector<float>>::iterator it;
+    int outgoing;
+    if (file.is_open()) {
+        
+        for (int i = start; i < stop; i++) {
+            file << "t = " << i << std::endl;
+            file << "N_ID / N_ID" << " , ";
+            counter = 0;
+            num.resize(record[i].weights[0].size());
+            for (it_num = num.begin(); it_num < num.end(); it_num++) {
+                *it_num = counter;
+                counter++;
+            }
+
+            vectorToCSV<int>(file, num);
+            outgoing = 0;
+            for (it = record[i].weights.begin(); it < record[i].weights.end(); it++) {
+                file << outgoing << " , ";
+                vectorToCSV<float>(file, *it);
+                outgoing++;
+            }
+            file << std::endl;
+        }
+    }
+    else {
+        std::cout << "Weights file cannot open!" << std::endl;
+    }
+    file.close();
+}
+
+void FLIF::saveCSV(char* filename, float threshold, int stop, int start) {
+
+    if (stop == -1) {
+        stop = record.size();
+    }
+
+    if ((record[0].available | 0b0111) == 0b1111) { // FLAGS 
+        getCSV(filename, 0, threshold, stop, start);
+    }
+
+    if ((record[0].available | 0b1011) == 0b1111) { // ENERGY
+        getCSV(filename, 1, threshold, stop, start);
+    }
+
+    if ((record[0].available | 0b1101) == 0b1111) { // FATIGUE
+        getCSV(filename, 2, threshold, stop, start);
+    }
+
+    if ((record[0].available | 0b1110) == 0b1111) { // WEIGHT
+        getWeightCSV(filename, stop, start);
     }
 }
 
@@ -457,7 +720,12 @@ int FLIF::getN(){
     return n_neuron;
 }
 
+std::string FLIF::getInfo() {
+    return "HI\n";
+}
+
 // Set
 void FLIF::setActivity(float act) {
     this->activity = act;
 }
+
