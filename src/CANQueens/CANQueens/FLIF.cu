@@ -8,6 +8,24 @@
 
 #include "FLIF.cuh"
 
+__global__ void setupRandom_kernel(curandState* state) {
+    unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
+    curand_init(1234, index, 0, &state[index]);
+}
+
+__global__ void updateFlags_kernel(curandState* my_curandstate, const int n, bool* d_flags, const float activity) {
+    unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
+    unsigned int stride = blockDim.x * gridDim.x;
+
+    float myrandf = curand_uniform(&(my_curandstate[index]));
+    myrandf *= (static_cast<int>(floorf(1.0f / activity)) + 0.999999); // between 0 and n_activity
+    int myrand = static_cast<int>(truncf(myrandf));
+
+    while (index < n) {
+        d_flags[index] = (0 == myrand);
+        index += stride;
+    }
+}
 
 int FLIF::nextID = 0;
 
@@ -35,7 +53,6 @@ void FLIF::initFlags(int n, float activity, std::vector<bool>& flag_vec) {
     }
 }
 
-
 void FLIF::initEF(int n, float upper, float lower, std::vector<float>& EF_vec) {
     /* Initialize energy/fatigueness levels randomly
      *
@@ -60,6 +77,32 @@ void FLIF::initEF(int n, float upper, float lower, std::vector<float>& EF_vec) {
     }
 }
 
+void FLIF::initFlags(int n, float activity, bool* h_flags) {
+    h_flags = new bool[n];
+    for (int i = 0; i < n; i++) {
+        h_flags[i] = (0 == (rand() % static_cast<int>(floorf(1.0f / activity))));
+    }
+}
+
+void FLIF::initEF(int n, float upper, float lower, float* h_EF) {
+    float temp;
+    h_EF = new float[n];
+
+    for (int i = 0; i < n; i++) {
+        temp = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        temp *= (upper - lower);
+        h_EF[i] = temp - lower;
+    }
+}
+
+void FLIF::deleteFlags(bool* h_flags) {
+    delete[] h_flags;
+}
+
+void FLIF::deleteEF(float* h_EF) {
+    delete[] h_EF;
+}
+
 // Updates
 void FLIF::updateFlags(std::vector<bool>& flag_vec,
     const float& activity) {
@@ -70,6 +113,18 @@ void FLIF::updateFlags(std::vector<bool>& flag_vec,
     }
 }
 
+void FLIF::updateFlags(int n, bool* h_flags, const float& activity) {
+    for (int i = 0; i < n; i++) {
+        h_flags[i] = (0 == (rand() % static_cast<int>(floorf(1.0f / activity))));
+    }
+}
+
+void FLIF::updateFlagsGPU(int n, bool* d_flags, const float& activity) {
+    curandState* d_state;
+    cudaMalloc(&d_state, sizeof(curandState));
+    setupRandom_kernel <<<1,1>>> (d_state);
+    updateFlags_kernel <<<1,1>>> (d_state, n, d_flags, activity);
+}
 
 // Methods
 
@@ -111,6 +166,16 @@ int FLIF::num_fire(std::vector<bool>& firings) {
     std::vector<bool>::iterator it;
     for (it = firings.begin(); it < firings.end(); it++) {
         if (*it) {
+            fire++;
+        }
+    }
+    return fire;
+}
+
+int FLIF::num_fire(int n, const bool* firings) {
+    int fire = 0;
+    for (int i = 0; i < n; i++) {
+        if (firings[i]) {
             fire++;
         }
     }
@@ -184,6 +249,12 @@ REC FLIF::setRecord(int available) {
     }
     
     return temp;
+}
+
+template<typename T>
+void FLIF::initDevice(int n, T* d_vec, const T* h_vec) {
+    cudaMalloc((void**)&d_vec, n*sizeof(T));
+    cudaMemcpy(d_vec, h_vec, n*sizeof(T), cudaMemcpyHostToDevice);
 }
 
 template<typename T>

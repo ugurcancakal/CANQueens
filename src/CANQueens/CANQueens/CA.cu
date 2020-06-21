@@ -167,7 +167,6 @@ float CA::dotP(const std::vector<float>& weights_vec,
     }
 
     float sum = 0.0f;
-    int i = 0;
     std::vector<bool>::const_iterator it_f;
     std::vector<float>::const_iterator it_w;
     it_w = weights_vec.begin();
@@ -181,6 +180,35 @@ float CA::dotP(const std::vector<float>& weights_vec,
 }
 
 
+//__device__ void CA::dotP_GPU(float* v1, float* v2, float* product, unsigned int n) {
+//    unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
+//    unsigned int stride = blockDim.x * gridDim.x;
+//
+//    __shared__ float cache[1024]; // to use the thread-block shared memory
+//
+//    float temp = 0;
+//
+//    while (index < n) {
+//        temp += v1[index] * v2[index];
+//        index += stride;
+//    }
+//    cache[threadIdx.x] = temp;
+//    __syncthreads();
+//
+//    //Reduction
+//    unsigned int i = blockDim.x / 2;
+//    while (i != 0) {
+//        if (threadIdx.x < i) {
+//            cache[threadIdx.x] += cache[threadIdx.x + i];
+//        }
+//        __syncthreads();
+//        i /= 2;
+//    }
+//
+//    if (threadIdx.x == 0) {
+//        atomicAdd(product, cache[0]);
+//    }
+//}
 
 
 // PUBLIC MEMBERS

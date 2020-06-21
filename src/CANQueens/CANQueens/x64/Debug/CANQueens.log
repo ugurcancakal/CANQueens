@@ -1,13 +1,61 @@
-﻿  Compiling CUDA source file main.cu...
-  Compiling CUDA source file Controller.cu...
+﻿  Compiling CUDA source file Synapse.cu...
   
-  C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\bin\HostX86\x64" -x cu  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\main.cu.obj "C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\main.cu" 
+  C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\bin\HostX86\x64" -x cu  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\Synapse.cu.obj "C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cu" 
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(55): warning : type qualifier on a reference type is not allowed
   
-  C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\bin\HostX86\x64" -x cu  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\Controller.cu.obj "C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Controller.cu" 
-  main.cu
-  Controller.cu
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/main.cu(18): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Controller.cu(14): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Controller.cu(114): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Controller.cu(152): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(70): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(72): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(95): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(105): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(106): warning : type qualifier on a reference type is not allowed
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(189): warning : type qualifier on a reference type is not allowed
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(190): warning : variable "indice" was declared but never referenced
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(191): warning : variable "counter" was declared but never referenced
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(296): warning : type qualifier on a reference type is not allowed
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(298): warning : type qualifier on a reference type is not allowed
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(405): warning : type qualifier on a reference type is not allowed
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(481): warning : type qualifier on a reference type is not allowed
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(527): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(55): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(70): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(72): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(95): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(105): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(106): warning : type qualifier on a reference type is not allowed
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(189): warning : type qualifier on a reference type is not allowed
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(296): warning : type qualifier on a reference type is not allowed
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(298): warning : type qualifier on a reference type is not allowed
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(405): warning : type qualifier on a reference type is not allowed
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(481): warning : type qualifier on a reference type is not allowed
+  
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(527): warning : type qualifier on a reference type is not allowed
+  
+  Synapse.cu
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(163): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(394): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(419): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(472): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   CANQueens.vcxproj -> C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\x64\Debug\CANQueens.exe

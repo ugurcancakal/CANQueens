@@ -25,18 +25,20 @@ int main(int argc, char** argv) {
 	// Modulo falan olabilir
 
 	// 200619
-	 //CA::POC();
+	// CA::POC();
 	// Explore::POC();
 	// Memory::POC();
-	 //Board::POC();
+	// Board::POC();
 
-	int n = 8;
+	/*int n = 8;
 	Controller myController(n);
 	myController.runFor(10);
 	myController.saveLog();
-	
+	return 0;*/
 
-	return 0;
+	// 201621 GPU
+	Synapse::POC();
+	   	 
 }
 
 

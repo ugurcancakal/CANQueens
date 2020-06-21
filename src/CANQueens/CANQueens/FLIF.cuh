@@ -22,6 +22,32 @@
 #include <time.h>
 #include <windows.h>
 
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+#include <curand.h>
+#include <curand_kernel.h>
+#include <math.h>
+
+// CUDA KERNELS
+__global__ void setupRandom_kernel(curandState* state);
+__global__ void updateFlags_kernel(curandState* my_curandstate, const int n, bool* d_flags, const float activity);
+
+struct CSC {
+    // Sparse matrix storage compressed sparse column format
+    int rowSize;
+    int columnSize;
+    int nonzeros;
+    int* CO; // Column offsets
+    int* RI; // Row indices
+    float* data;
+};
+
+struct COO {
+    int i;
+    int j;
+    float data;
+};
+
 struct REC {
     // 0000 represent none 1111 all 0101 energy and weights
     int available; 
@@ -50,11 +76,23 @@ protected:
 
     std::vector<REC> record;
 
-    // Neurons
+    // Neurons == gidecekler
     std::vector<bool> flags; // firing flags phi
     std::vector<float> energy; // energy levels
     std::vector<float> fatigue; // fatigue levels
     std::vector<std::vector<float>> weights;
+
+    // Host Neurons
+    bool* h_flags;
+    float* h_energy;
+    float* h_fatigue;
+    CSC* h_weights;
+
+    // Device Neurons
+    bool* d_flags;
+    float* d_energy;
+    float* d_fatigue;
+    CSC* d_weights;
 
     // Inits
     void initFlags(int n, float activity,
@@ -62,24 +100,47 @@ protected:
     void initEF(int n, float upper, float lower,
         std::vector<float>& EF_vec);
 
+    // Host Inits
+    void initFlags(int n, float activity,
+        bool* h_flags);
+    void initEF(int n, float upper, float lower,
+        float* h_EF);
+
+    template <typename T>
+    void initDevice(int n, T* d_vec, const T* h_vec);
+
+    void deleteFlags(bool* h_flags);
+    void deleteEF(float* h_EF);
+
     // Updates
     void updateFlags(std::vector<bool>& flag_vec,
                      const float& activity);
 
+    // Update Host
+    void updateFlags(int n,
+                     bool* h_flags,
+                     const float& activity);
+
+    void updateFlagsGPU(int n,
+                        bool* d_flags,
+                        const float& activity);
+
     //Methods
     std::string dateTimeStamp(const char* filename);
+
     int num_fire(std::vector<bool>& firings);
+    int num_fire(int n, const bool* firings);
+
     REC_SIZE sizeCheckRecord(int stop, int start);
     REC setRecord(int available);
 
     template <typename T>
     std::string vectorToString(const std::vector<T>& vec);    
+
     template <typename T>
     void vectorToCSV(std::ostream& file, const std::vector<T>& entry);
-
     void getWeightCSV(char* filename, int stop, int start);
    
-
     friend class Synapse;
 public:
     //Constructors
@@ -102,8 +163,6 @@ public:
 
     // Set
     void setActivity(float act);
-    
-
     //CUDA_CALLABLE_MEMBER std::string toString();
 };
 

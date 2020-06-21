@@ -60,6 +60,8 @@ protected:
     float dotP(const std::vector<float>& weights_vec,
                const std::vector<bool>& flags_vec);
 
+    //__device__ void dotP_GPU(float* v1, float* v2, float* product, unsigned int n);
+
 public:
     // Constructors - Destructors
     CA(int n = d_n_neuron,
