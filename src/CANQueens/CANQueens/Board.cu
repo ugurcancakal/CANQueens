@@ -332,7 +332,7 @@ std::string Board::toString(PrintType type) {
     }
 }
 
-void Board::connect(FLIF* pre_synaptic, float inhibitory, float strength, float rate) {
+void Board::connect_CPU(FLIF* pre_synaptic, float inhibitory, float strength, float rate) {
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
             if (0 == (rand() % static_cast<int>(floorf(1.0f / rate)))) {
@@ -342,30 +342,68 @@ void Board::connect(FLIF* pre_synaptic, float inhibitory, float strength, float 
     }
 }
 
-void Board::update() {
+
+void Board::connect_GPU(FLIF* pre_synaptic, float inhibitory, float strength, float rate) {
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            if (0 == (rand() % static_cast<int>(floorf(1.0f / rate)))) {
+                board[i][j].connectIn(pre_synaptic, strength, inhibitory);
+                board[i][j].connectRestore_GPU();
+            }
+        }
+    }
+}
+
+void Board::update_CPU() {
     /* Update each CA in the board.
      * Update policy is depended on each CA seperately.
      * Board is interested in resulting ignition flag only.
      */
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
-            board[i][j].update();  
+            board[i][j].update_CPU();  
         }
     }
     boardToCh(); 
 }
 
-void Board::runFor(int timeStep) {
+void Board::runFor_CPU(int timeStep) {
     for (int t = 0; t < timeStep; t++) {
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
-                board[i][j].runFor(1);
+                board[i][j].runFor_CPU(1);
             }
         }
         history++;
     }
     boardToCh();
     
+}
+
+void Board::update_GPU() {
+    /* Update each CA in the board.
+     * Update policy is depended on each CA seperately.
+     * Board is interested in resulting ignition flag only.
+     */
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            board[i][j].update_GPU();
+        }
+    }
+    boardToCh();
+}
+
+void Board::runFor_GPU(int timeStep) {
+    for (int t = 0; t < timeStep; t++) {
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                board[i][j].runFor_GPU(1);
+            }
+        }
+        history++;
+    }
+    boardToCh();
+
 }
 
 // GET
@@ -424,13 +462,28 @@ void Board::saveCSV(char* filename, float threshold, int stop, int start) {
 }
 
 
-void Board::POC() {
+void Board::POC_CPU() {
     int timeStep = 10;
     Board* board;
     board = new Board(8);
 
-    board->runFor(timeStep);
+    board->runFor_CPU(timeStep);
     std::cout << board->getActivity() << std::endl;
 }
 
+void Board::POC_GPU() {
+    int timeStep = 10;
+    Board* board;
+    board = new Board(8);
+    board->initBoardGPU();
+    board->runFor_GPU(timeStep);
+    std::cout << board->getActivity() << std::endl;
+}
 
+void Board::initBoardGPU() {
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            this->board[i][j].initCADevice();
+        }
+    }
+}

@@ -28,11 +28,16 @@ public:
     ~Explore();
 
     // Running
-    void runFor(int timeStep, int available = d_available);
-    void update(float act = -1.0f);
+    void runFor_CPU(int timeStep, int available = d_available);
+    void update_CPU(float act = -1.0f);
+
+    void runFor_GPU(int timeStep, int available = d_available);
+    void update_GPU(float act = -1.0f);
     
     // Proof of Concept
-    static void POC();
+    static void POC_CPU();
+    static void POC_GPU();
+    void initExploreGPU();
 };
 
 #endif // EXPLORE_H

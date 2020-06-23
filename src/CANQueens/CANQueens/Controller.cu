@@ -7,6 +7,18 @@
 
 #include "Controller.cuh"
 
+void Controller::runFor_CPU(int stepSize) {
+    for (int i = 0; i < stepSize; i++) {
+        step_CPU();
+    }
+}
+
+void Controller::runFor_GPU(int stepSize) {
+    for (int i = 0; i < stepSize; i++) {
+        step_GPU();
+    }
+}
+
 Controller::Controller(int n) {
     //std::cout << "Controller constructed" << std::endl
     //          << "Welcome to CANQueens Project" << std::endl;
@@ -23,10 +35,6 @@ Controller::Controller(int n) {
     
     //value.connect(explore);
     //memory.connect(board);
-
-    //SADECE CONNECTIONLAR KALDI
-    board->connect(memory);
-    board->connect(explore);
     
     //std::string temp = "\n";
     //for (int i = 0; i < n; i++) {
@@ -42,38 +50,63 @@ Controller::Controller(int n) {
     //std::cout << myBoard.toString(Board::PrintType::full) << std::endl;
 }
 
-void Controller::step() {
+void Controller::step_CPU() {
     VAL temp;
     // Show Board
-    std::cout << board->toString(Board::PrintType::full) << std::endl;
-    std::cout << board->toString(Board::PrintType::chrom) << std::endl;
+    /*std::cout << board->toString(Board::PrintType::full) << std::endl;
+    std::cout << board->toString(Board::PrintType::chrom) << std::endl;*/
     std::vector<int> chVec(board->getChromosome(), board->getChromosome() + n_neuron);
     choromosomeRec.push_back(chVec);
     
     // Evaluate Board
     temp.fitness = value->fitness(chromosome);
-    std::cout << temp.fitness << std::endl;
+    //std::cout << temp.fitness << std::endl;
 
     // Update Explore
     temp.activity = value->activity(n_neuron, chromosome);
 
     explore->setActivity(temp.activity);
-    explore->runFor(1);
+    explore->runFor_CPU(1);
     //std::cout << explore->getActivity() << std::endl;
 
     // Update Memory
-    memory->runFor(1);
+    memory->runFor_CPU(1);
 
     // Update Board
-    board->runFor(1);
+    board->runFor_CPU(1);
+    //std::cout << board->getActivity() << std::endl;
     valueRec.push_back(temp);
 }
 
-void Controller::runFor(int stepSize) {
-    for (int i = 0; i < stepSize; i++) {
-        step();
-    }
+void Controller::step_GPU() {
+    VAL temp;
+    // Show Board
+    //std::cout << board->toString(Board::PrintType::full) << std::endl;
+    //std::cout << board->toString(Board::PrintType::chrom) << std::endl;
+    std::vector<int> chVec(board->getChromosome(), board->getChromosome() + n_neuron);
+    choromosomeRec.push_back(chVec);
+
+    // Evaluate Board
+    temp.fitness = value->fitness(chromosome);
+    //std::cout << temp.fitness << std::endl;
+
+    // Update Explore
+    temp.activity = value->activity(n_neuron, chromosome);
+
+    explore->setActivity(temp.activity);
+    explore->runFor_GPU(1);
+    //std::cout << explore->getActivity() << std::endl;
+
+    // Update Memory
+    memory->runFor_GPU(1);
+
+    // Update Board
+    board->runFor_GPU(1);
+    //std::cout << board->getActivity() << std::endl;
+    valueRec.push_back(temp);
 }
+
+
 
 Controller::~Controller() {
     //std::cout << "Controller destructed" << std::endl;
@@ -257,6 +290,43 @@ void Controller::saveLog() {
     else {
         std::cout << base << " directory could not created!" << std::endl;
     }
+}
+
+
+void Controller::POC_CPU() {
+    int n = 8;
+    Controller CANQueen = getControllerCPU(n);
+    CANQueen.runFor_CPU(10);
+    //CANQueen.saveLog();
+
+}
+
+void Controller::POC_GPU() {
+    // INIT
+    
+    int n = 8;
+    Controller CANQueen = getControllerGPU(n);
+    CANQueen.runFor_GPU(10);
+    //CANQueen.saveLog();
+
+}
+
+Controller Controller::getControllerCPU(int n){
+    Controller CANQueen(n);
+    CANQueen.board->connect_CPU(CANQueen.memory);
+    CANQueen.board->connect_CPU(CANQueen.explore);
+
+    return CANQueen;
+}
+
+Controller Controller::getControllerGPU(int n) {
+    Controller CANQueen(n);
+    CANQueen.explore->initExploreGPU();
+    CANQueen.memory->initMemoryGPU();
+    CANQueen.board->initBoardGPU();
+    CANQueen.board->connect_GPU(CANQueen.memory);
+    CANQueen.board->connect_GPU(CANQueen.explore);
+    return CANQueen;
 }
 
 

@@ -25,6 +25,91 @@
 
 #include "CA.cuh"
 
+__global__ void updatePhi_kernel(int n, bool* d_flags, float* d_energy, float* d_fatigue, float theta) {
+    unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
+    unsigned int stride = blockDim.x * gridDim.x;
+    while (index < n) {
+        d_flags[index] = (d_energy[index] - d_fatigue[index]) > theta ? true : false;
+        index += stride;
+    }
+}
+
+__global__ void dotP_kernel(float* product, int start, int stop, int* RI, float* data, bool* d_flags) {
+    /*float sum = 0.0f;
+    for (int i = start; i < stop; i++) {
+        if (flags[RI[i]]) {
+            sum += data[i];
+        }
+    }*/
+
+    unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
+    unsigned int stride = blockDim.x * gridDim.x;
+
+    extern __shared__ float cache[]; // to use the thread-block shared memory
+
+    float temp = 0.0f;
+    float sum = 0.0f;
+
+    while (index < stop - start) {
+        if (d_flags[RI[index+start]]) {
+            sum += data[index + start];
+        }
+        index += stride;
+    }
+    cache[threadIdx.x] = temp;
+    __syncthreads();
+
+    //Reduction
+    unsigned int i = blockDim.x / 2;
+    while (i != 0) {
+        if (threadIdx.x < i) {
+            cache[threadIdx.x] += cache[threadIdx.x + i];
+        }
+        __syncthreads();
+        i /= 2;
+    }
+
+    if (threadIdx.x == 0) {
+        atomicAdd(product, cache[0]);
+    }
+}
+
+__global__ void updateE_kernel(int n, float* d_energy, int c_decay, float* product, int* CO, int* RI, float*data, bool* d_flags) {
+    unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
+    unsigned int stride = blockDim.x * gridDim.x;
+    while (index < n) {    
+        dotP_kernel << <1, 1, n >> > (product, CO[index], CO[index + 1], RI, data, d_flags);
+        
+        if (d_flags[index]) {  
+            d_energy[index] = *product;
+        }
+        else {
+            d_energy[index] = ((1.0f / (1.0f*c_decay)) * (d_energy[index])) + *product;
+        }
+        index += stride;
+    }
+}
+
+__global__ void updateF_kernel(int n, float* d_fatigue, bool* const d_flags, float f_fatigue, float f_recover){
+    unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
+    unsigned int stride = blockDim.x * gridDim.x;
+    while (index < n) {
+        if (d_flags[index]) {
+            d_fatigue[index] += f_fatigue;
+        }
+        else {
+            if (d_fatigue[index] - f_recover > 0.0f) {
+                d_fatigue[index] = d_fatigue[index] - f_recover;
+            }
+            else {
+                d_fatigue[index] = 0.0f;
+            }
+        }
+        index += stride;
+    }
+}
+
+
 // Default values for CA initiation
 int CA::d_n_neuron = 10;
 float CA::d_activity = 0.5f;
@@ -74,6 +159,17 @@ void CA::updateFlags(std::vector<bool>& flag_vec,
     }
 }
 
+void CA::updateFlags(int n, bool*& h_flags, float*& const h_energy, float*& const h_fatigue, const float& theta) {
+    for (int i = 0; i < n; i++) {
+        if (h_energy[i] - h_fatigue[i] > theta) {
+            h_flags[i] = true;
+        }
+        else {
+            h_flags[i] = false;
+        }
+    }
+}
+
 void CA::updateE(std::vector<float>& energy_vec,
                  const std::vector<std::vector<float>>& weight_vec,
                  const std::vector<bool>& flag_vec,
@@ -110,6 +206,26 @@ void CA::updateE(std::vector<float>& energy_vec,
     }
 }
 
+void CA::updateE(int n, float*& h_energy, CSC*& const h_weights, bool*& const h_preFlags, const int& c_decay) {
+   for (int i = 0; i < n; i++) {
+        if (h_preFlags[i]) {
+            h_energy[i] = dotP(h_weights->CO[i], 
+                h_weights->CO[i + 1],
+                h_weights->RI, 
+                h_weights->data, 
+                h_preFlags);
+        }
+        else {
+            h_energy[i] = ((1.0f / c_decay) * (h_energy[i])) + dotP(h_weights->CO[i],
+                h_weights->CO[i + 1],
+                h_weights->RI,
+                h_weights->data,
+                h_preFlags);
+        }
+        
+    }
+}
+
 void CA::updateF(std::vector<float>& fatigue_vec, 
                  const std::vector<bool>& flag_vec, 
                  const float& f_fatigue,
@@ -142,6 +258,24 @@ void CA::updateF(std::vector<float>& fatigue_vec,
         it++;
     }
 }
+
+void CA::updateF(int n, float*& h_fatigue, bool*& const h_flags, float& const f_fatigue, float& const f_recover) {
+    for (int i = 0; i < n; i++) {
+        if (h_flags[i]) {
+            h_fatigue[i] += f_fatigue;
+        }
+        else {
+            if (h_fatigue[i] - f_recover > 0.0f) {
+                h_fatigue[i] = h_fatigue[i] - f_recover;
+            }
+            else {
+                h_fatigue[i] = 0.0f;
+            }
+        }
+    }
+}
+
+
 
 // Methods
 float CA::dotP(const std::vector<float>& weights_vec, 
@@ -179,36 +313,180 @@ float CA::dotP(const std::vector<float>& weights_vec,
     return sum;
 }
 
+float CA::dotP(const int& start, const int& stop, int*& const RI, float*& const data, bool*& const flags) {
+    float sum = 0.0f;
+    for (int i = start; i < stop; i++) {
+        if (flags[RI[i]]) {
+            sum += data[i];
+        }
+    }
+    return sum;
+}
 
-//__device__ void CA::dotP_GPU(float* v1, float* v2, float* product, unsigned int n) {
-//    unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
-//    unsigned int stride = blockDim.x * gridDim.x;
-//
-//    __shared__ float cache[1024]; // to use the thread-block shared memory
-//
-//    float temp = 0;
-//
-//    while (index < n) {
-//        temp += v1[index] * v2[index];
-//        index += stride;
-//    }
-//    cache[threadIdx.x] = temp;
-//    __syncthreads();
-//
-//    //Reduction
-//    unsigned int i = blockDim.x / 2;
-//    while (i != 0) {
-//        if (threadIdx.x < i) {
-//            cache[threadIdx.x] += cache[threadIdx.x + i];
-//        }
-//        __syncthreads();
-//        i /= 2;
-//    }
-//
-//    if (threadIdx.x == 0) {
-//        atomicAdd(product, cache[0]);
-//    }
-//}
+void CA::initCADevice() {
+    this->initBoolDevice(this->n_neuron, this->d_flags, this->h_flags);
+    this->initBoolDevice(this->preSize, this->d_preFlags, this->h_preFlags);
+    this->initBoolDevice(this->postSize, this->d_postFlags, this->h_postFlags);
+    this->initFloatDevice(this->n_neuron, this->d_energy, this->h_energy);
+    this->initFloatDevice(this->n_neuron, this->d_fatigue, this->h_fatigue);
+    this->initCSCDevice(this->d_weights, this->h_weights);
+}
+
+void CA::freeCADevice() {
+    this->freeBoolDevice(this->d_flags);
+    this->freeBoolDevice(this->d_preFlags);
+    this->freeBoolDevice(this->d_postFlags);
+    this->freeFloatDevice(this->d_energy);
+    this->freeFloatDevice(this->d_fatigue);
+    this->freeCSCDevice(this->d_weights);
+}
+
+cudaError_t CA::getDeviceToHostEF(const int& n, float*& h_EF, float*& const d_EF) {
+    cudaError_t cudaStatus;
+    // Copy output vector from GPU buffer to host memory.
+    cudaStatus = cudaMemcpy(h_EF, d_EF, n * sizeof(float), cudaMemcpyDeviceToHost);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "EF cudaMemcpy failed!");
+        return cudaStatus;
+    }
+    return cudaStatus;
+}
+
+cudaError_t CA::getDeviceToHostFlags(const int& n, bool*& h_flags, bool*& const d_flags) {
+    cudaError_t cudaStatus;
+    // Copy output vector from GPU buffer to host memory.
+    cudaStatus = cudaMemcpy(h_flags, d_flags, n * sizeof(bool), cudaMemcpyDeviceToHost);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "Flags cudaMemcpy failed!");
+        return cudaStatus;
+    }
+    return cudaStatus;
+}
+
+cudaError_t CA::errorCheckCUDA(bool synchronize) {
+    // Check for any errors launching the kernel
+    cudaError_t cudaStatus;
+    cudaStatus = cudaGetLastError();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "kernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+        return cudaStatus;
+    }
+
+    // cudaDeviceSynchronize waits for the kernel to finish, and returns
+    // any errors encountered during the launch.
+    if (synchronize) {
+        cudaStatus = cudaDeviceSynchronize();
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching kernel!\n", cudaStatus);
+            return cudaStatus;
+        }
+    }
+    return cudaStatus;
+    
+}
+
+cudaError_t CA::updatePreGPU() {
+    cudaError_t cudaStatus;
+    updatePre(this->h_preFlags, this->preSize, this->incomingList);
+
+    //std::cout << "UP PRE SIZE :" << this->preSize << std::endl;
+    //std::cout << vectorToString<bool>(std::vector<bool>(this->h_preFlags, this->h_preFlags+this->preSize)) << std::endl;
+    cudaStatus = freeBoolDevice(this->d_preFlags);
+    cudaStatus = initBoolDevice(this->preSize, this->d_preFlags, this->h_preFlags);
+    return cudaStatus;
+    
+}
+
+cudaError_t CA::updatePostGPU() {
+    cudaError_t cudaStatus;
+    updatePost(this->h_postFlags, this->postSize, this->outgoingList);
+    /*std::cout << "UP POST SIZE :" << this->postSize << std::endl;
+    std::cout << vectorToString<bool>(std::vector<bool>(this->h_postFlags, this->h_postFlags + this->postSize)) << std::endl;*/
+    
+    cudaStatus = freeBoolDevice(this->d_postFlags);
+    cudaStatus = initBoolDevice(this->postSize, this->d_postFlags, this->h_postFlags);
+    return cudaStatus;
+}
+
+cudaError_t CA::updateE_GPU(dim3 gridSize, dim3 blockSize, bool synchronize, bool memCopy) {
+    cudaError_t cudaStatus;
+
+    updateE_kernel << <gridSize, blockSize >> > (this->n_neuron,
+        this->d_energy,
+        this->c_decay,
+        this->product,
+        this->d_weights->CO,
+        this->d_weights->RI,
+        this->d_weights->data,
+        this->d_preFlags);
+    cudaStatus = errorCheckCUDA(synchronize);
+
+    if (memCopy) {
+        cudaStatus = getDeviceToHostEF(this->n_neuron, this->h_energy, this->d_energy);
+    }
+
+    return cudaStatus;
+}
+
+cudaError_t CA::updateF_GPU(dim3 gridSize, dim3 blockSize, bool synchronize, bool memCopy) {
+    cudaError_t cudaStatus;
+
+    updateF_kernel << <gridSize, blockSize >> > (this->n_neuron,
+        this->d_fatigue,
+        this->d_flags,
+        this->f_fatigue,
+        this->f_recover);
+
+    cudaStatus = errorCheckCUDA(synchronize);
+
+    if (memCopy) {
+        cudaStatus = getDeviceToHostEF(this->n_neuron, this->h_fatigue, this->d_fatigue);
+    }
+
+    return cudaStatus;
+}
+
+cudaError_t CA::updateWeights_GPU(dim3 gridSize, dim3 blockSize, bool synchronize, bool memCopy) {
+    cudaError_t cudaStatus;
+    updateWeights_kernel << <gridSize, blockSize >> > (this->preSize,
+        this->d_preFlags,
+        this->postSize,
+        this->d_postFlags,
+        this->alpha,
+        this->w_average,
+        this->w_current,
+        this->d_weights->CO,
+        this->d_weights->RI,
+        this->d_weights->data);
+
+    cudaStatus = errorCheckCUDA(synchronize);
+
+    if (memCopy) {
+        cudaStatus = getDeviceToHostCSC(this->h_weights, this->d_weights);
+    }
+
+    return cudaStatus;
+}
+
+cudaError_t CA::updatePhi_GPU(dim3 gridSize, dim3 blockSize, bool synchronize, bool memCopy) {
+    
+    cudaError_t cudaStatus;
+    updatePhi_kernel << <gridSize, blockSize >> > (this->n_neuron,
+        this->d_flags,
+        this->d_energy,
+        this->d_fatigue,
+        this->theta);
+
+    cudaStatus = errorCheckCUDA(synchronize);
+
+    if (memCopy) {
+        cudaStatus = getDeviceToHostFlags(this->n_neuron, this->h_flags, this->d_flags);
+    }
+
+    return cudaStatus;
+}
+
+
 
 
 // PUBLIC MEMBERS
@@ -277,8 +555,22 @@ CA::CA(int n,
     pre_flags = this->flags;
     post_flags = this->flags;
 
+    // Neurons -- Host
+    preSize = n;
+    postSize = n;
+    initFlags(n, activity, this->h_flags);
+    initFlags(n, activity, this->h_preFlags);
+    initFlags(n, activity, this->h_postFlags);
+    initWeights(n, n, connectivity, inhibitory, this->h_weights);
+    initEF(n, C[0] + C[3], 0.0f, this -> h_energy);
+    initEF(n, C[3], 0.0f, this->h_fatigue);
+
+    cudaMalloc((void**)&product, sizeof(float));
+
     this->incomingList.push_back(this);
     this->outgoingList.push_back(this);
+
+    
 }
 
 CA::~CA() {
@@ -289,7 +581,7 @@ CA::~CA() {
 }
 
 // Running
-void CA::runFor(int timeStep, int available) {
+void CA::runFor_CPU(int timeStep, int available) {
     /* Run the CA for defined timestep and record the activity
      * Implemented for raster plot drawing
      *
@@ -298,28 +590,83 @@ void CA::runFor(int timeStep, int available) {
      *          number of steps to stop running
      */    
     for (int i = 0; i < timeStep; i++) {
+        CSCToDense(this->weights, this->h_weights);
         record.push_back(setRecord(available));
-        //std::cout << record[0].energy.size() << std::endl;
-        update();
+        update_CPU();
     }
     
 }
 
-void CA::update() {
+
+
+void CA::runFor_GPU(int timeStep, int available) {
+    /* Run the CA for defined timestep and record the activity
+     * Implemented for raster plot drawing
+     *
+     * Parameters:
+     *      timestep(int):
+     *          number of steps to stop running
+     */
+    for (int i = 0; i < timeStep; i++) {  
+        CSCToDense(this->weights, this->h_weights);
+        record.push_back(setRecord(available));
+        update_GPU();
+    }
+
+}
+
+void CA::update_CPU() {
     /* Update the CA by updating neuron related data structures
      * ! pre_synaptic and post_synaptic not in use
      */
-    updatePre(this->pre_flags, this->incomingList);
-    updatePost(this->post_flags, this->outgoingList);
-    updateE(this -> energy, this -> weights, this -> pre_flags, this -> c_decay);
-    updateF(this -> fatigue, this -> flags, this -> f_fatigue, this -> f_recover);
-    // UPDATE W_AVERAGE and W_CURRENT
-    updateWeights(this -> weights, this -> pre_flags, this -> post_flags, this -> alpha, this -> w_average, this -> w_current);
-    updateFlags(this -> flags, this -> energy, this -> fatigue, this -> theta);
-    this -> ignition = num_fire(this -> flags) > (this -> n_threshold);
-    
+    //updatePre(this->pre_flags, this->incomingList);
+    //updatePost(this->post_flags, this->outgoingList);
+    //updateE(this->energy, this->weights, this->pre_flags, this->c_decay);
+    //updateF(this->fatigue, this->flags, this->f_fatigue, this->f_recover);
+    //// UPDATE W_AVERAGE and W_CURRENT
+    //updateWeights(this->weights, this->pre_flags, this->post_flags, this->alpha, this->w_average, this->w_current);
+    //updateFlags(this->flags, this->energy, this->fatigue, this->theta);
+    //this->ignition = num_fire(this->flags) > (this->n_threshold);
+
+    updatePre(this->h_preFlags, this->preSize, this->incomingList);
+    updatePost(this->h_postFlags, this->postSize, this->outgoingList);
+    updateE(this->n_neuron, this->h_energy, this->h_weights, this->h_preFlags, this->c_decay);   
+    updateF(this->n_neuron, this->h_fatigue, this->h_flags, this->f_fatigue, this->f_recover);
+    //std::cout << "PRE SIZE: " << this->preSize << std::endl;
+    //std::cout << "POST SIZE: " << this->postSize << std::endl;
+    updateWeights(this->h_weights, this->preSize, this->h_preFlags, this->postSize, this->h_postFlags, this->alpha, this->w_average, this->w_current);
+    updateFlags(this->n_neuron, this->h_flags, this->h_energy, this->h_fatigue, this->theta);
+    this->ignition = num_fire(this->n_neuron, this->h_flags) > (this->n_threshold);
+
+
     //std::cout << "Size\n" <<activity.size() << std::endl;
     //std::cout << activityRecord.size() << std::endl;
+}
+
+void CA::update_GPU() {
+    /* Update the CA by updating neuron related data structures
+     * ! pre_synaptic and post_synaptic not in use
+     */
+    //updatePre(this->pre_flags, this->incomingList);
+    //updatePost(this->post_flags, this->outgoingList);
+    //updateE(this->energy, this->weights, this->pre_flags, this->c_decay);
+    //updateF(this->fatigue, this->flags, this->f_fatigue, this->f_recover);
+    //// UPDATE W_AVERAGE and W_CURRENT
+    //updateWeights(this->weights, this->pre_flags, this->post_flags, this->alpha, this->w_average, this->w_current);
+    //updateFlags(this->flags, this->energy, this->fatigue, this->theta);
+    //this->ignition = num_fire(this->flags) > (this->n_threshold);
+
+    dim3 gridSize = 1;
+    dim3 blockSize = this->n_neuron; // Limitted to 1024
+    cudaError_t cudaStatus;
+    
+    cudaStatus = updatePreGPU();
+    cudaStatus = updatePostGPU();
+    cudaStatus = updateE_GPU(gridSize, blockSize);
+    cudaStatus = updateF_GPU(gridSize, blockSize);
+    cudaStatus = updateWeights_GPU(gridSize, blockSize);
+    cudaStatus = updatePhi_GPU(gridSize, blockSize);
+    this->ignition = num_fire(this->n_neuron, this->h_flags) > (this->n_threshold);
 }
 
 // GET
@@ -333,7 +680,7 @@ bool CA::getIgnition() {
     return ignition;
 }
 
-void CA::POC() {
+void CA::POC_CPU() {
     CA* myCA1;
     CA* myCA2;
     CA* myCA3;
@@ -342,20 +689,53 @@ void CA::POC() {
     myCA2 = new CA(4);
     myCA3 = new CA(5);
 
-    myCA1->runFor(10);
-    myCA2->runFor(1);
-    myCA3->runFor(1);
+    myCA1->runFor_CPU(10);
+    myCA2->runFor_CPU(1);
+    myCA3->runFor_CPU(1);
 
     CA::connect(myCA1, 0.2, 0.0, myCA2, 0.2, 0.0);
     CA::connect(myCA3, 0.2, 0.0, myCA1, 0.2, 0.0);
 
-    myCA1->runFor(1);
-    myCA2->runFor(1);
-    myCA3->runFor(1);
-
+    myCA1->runFor_CPU(1);
+    myCA2->runFor_CPU(1);
+    myCA3->runFor_CPU(1);
 
     std::cout << myCA1->getActivity() << std::endl;
     std::cout << myCA2->getActivity() << std::endl;
     std::cout << myCA3->getActivity() << std::endl;
-    myCA1->saveCSV("");
+
+    //myCA1->saveCSV("");
+}
+
+void CA::POC_GPU() {
+    // CONNECT DURUMUNDA GPU YA GONDERMEK GEREK POST PRE VE WEIGHTS
+    CA* myCA1;
+    CA* myCA2;
+    CA* myCA3;
+
+    myCA1 = new CA(5);
+    myCA1->initCADevice();
+    
+    myCA2 = new CA(4);
+    myCA2->initCADevice();
+
+    myCA3 = new CA(5);
+    myCA3->initCADevice();
+
+    myCA1->runFor_GPU(10);
+    myCA2->runFor_GPU(1);
+    myCA3->runFor_GPU(1);
+
+    CA::connect_GPU(myCA1, 0.2f, 0.0, myCA2, 0.2f, 0.0);
+    CA::connect_GPU(myCA2, 0.2f, 0.0, myCA1, 0.2f, 0.0);
+       
+    myCA1->runFor_GPU(1);
+    myCA2->runFor_GPU(1);
+    myCA3->runFor_GPU(1);
+
+    std::cout << myCA1->getActivity() << std::endl;
+    //std::cout << myCA2->getActivity() << std::endl;
+    //std::cout << myCA3->getActivity() << std::endl;
+
+    //myCA1->saveCSV("");
 }

@@ -29,14 +29,13 @@
 #include <math.h>
 
 // CUDA KERNELS
-__global__ void setupRandom_kernel(curandState* state);
-__global__ void updateFlags_kernel(curandState* my_curandstate, const int n, bool* d_flags, const float activity);
+__global__ void updateFlags_kernel(const int n, bool* d_flags, const float activity);
 
 struct CSC {
     // Sparse matrix storage compressed sparse column format
-    int rowSize;
-    int columnSize;
-    int nonzeros;
+    int* rowSize;
+    int* columnSize;
+    int* nonzeros;
     int* CO; // Column offsets
     int* RI; // Row indices
     float* data;
@@ -102,15 +101,20 @@ protected:
 
     // Host Inits
     void initFlags(int n, float activity,
-        bool* h_flags);
+        bool*& h_flags);
     void initEF(int n, float upper, float lower,
-        float* h_EF);
+        float*& h_EF);
 
-    template <typename T>
-    void initDevice(int n, T* d_vec, const T* h_vec);
+    cudaError_t initBoolDevice(int n, bool*& d_vec, bool*& const h_vec, bool alloc = true);
+    cudaError_t initIntDevice(int n, int*& d_vec, int*& const h_vec, bool alloc = true);
+    cudaError_t initFloatDevice(int n, float*& d_vec, float*& const h_vec, bool alloc = true);
 
-    void deleteFlags(bool* h_flags);
-    void deleteEF(float* h_EF);
+    cudaError_t freeBoolDevice(bool*& d_vec);
+    cudaError_t freeIntDevice(int*& d_vec);
+    cudaError_t freeFloatDevice(float*& d_vec);
+
+    void deleteFlags(bool*& h_flags);
+    void deleteEF(float*& h_EF);
 
     // Updates
     void updateFlags(std::vector<bool>& flag_vec,
@@ -118,24 +122,20 @@ protected:
 
     // Update Host
     void updateFlags(int n,
-                     bool* h_flags,
+                     bool*& h_flags,
                      const float& activity);
-
-    void updateFlagsGPU(int n,
-                        bool* d_flags,
-                        const float& activity);
 
     //Methods
     std::string dateTimeStamp(const char* filename);
 
     int num_fire(std::vector<bool>& firings);
-    int num_fire(int n, const bool* firings);
+    int num_fire(int n, bool*& const firings);
 
     REC_SIZE sizeCheckRecord(int stop, int start);
     REC setRecord(int available);
 
     template <typename T>
-    std::string vectorToString(const std::vector<T>& vec);    
+    std::string vectorToString(const std::vector<T>& vec);  
 
     template <typename T>
     void vectorToCSV(std::ostream& file, const std::vector<T>& entry);

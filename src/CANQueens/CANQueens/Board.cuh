@@ -53,11 +53,17 @@ public:
     // Printing
     enum class PrintType { full, comp, chrom };
     std::string toString(PrintType type);
-    void connect(FLIF* pre_synaptic, float inhibitory = 0.0f, float strength = 1.0f, float rate = 1.0f);
+    void connect_CPU(FLIF* pre_synaptic, float inhibitory = 0.0f, float strength = 1.0f, float rate = 1.0f);
+
+    void connect_GPU(FLIF* pre_synaptic, float inhibitory = 0.0f, float strength = 1.0f, float rate = 1.0f);
 
     // Update
-    void update();
-    void runFor(int timeStep);
+    void update_CPU();
+    void runFor_CPU(int timeStep);
+
+    // Update -- GPU
+    void update_GPU();
+    void runFor_GPU(int timeStep);
 
     // GET
     int* getChromosome();
@@ -66,7 +72,9 @@ public:
     void saveCSV(char* filename, float threshold = 0.0f, int stop = -1, int start = 0);
 
     // POC
-    static void POC();
+    static void POC_CPU();
+    static void POC_GPU();
+    void initBoardGPU();
 };
 
 #endif // BOARD_H

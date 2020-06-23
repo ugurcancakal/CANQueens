@@ -40,7 +40,8 @@ protected:
     std::vector<VAL> valueRec;
     std::vector<std::vector<int>> choromosomeRec;
 
-    void step();
+    void step_CPU();
+    void step_GPU();
     
     //Methods
     std::string dateTimeStamp(const char* filename);
@@ -49,13 +50,22 @@ protected:
     void saveInfo(char* filename);
 public:
     
-    void runFor(int stepSize);
+    void runFor_CPU(int stepSize);
+    void runFor_GPU(int stepSize);
     Controller(int n = 8);
     ~Controller();
     std::string toString();
     //CUDA_CALLABLE_MEMBER std::string toString();
     void saveLog();
+    void connect_CPU();
+    void connect_GPU();
 
+
+    static void POC_CPU();
+    static void POC_GPU();
+
+    static Controller getControllerCPU(int n);
+    static Controller getControllerGPU(int n);
 };
 
 #endif // CONTROLLER_H

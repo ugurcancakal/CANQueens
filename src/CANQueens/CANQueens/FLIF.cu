@@ -8,24 +8,22 @@
 
 #include "FLIF.cuh"
 
-__global__ void setupRandom_kernel(curandState* state) {
-    unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
-    curand_init(1234, index, 0, &state[index]);
-}
-
-__global__ void updateFlags_kernel(curandState* my_curandstate, const int n, bool* d_flags, const float activity) {
+__global__ void updateFlags_kernel(const int n, bool* d_flags, const float activity) {
     unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
     unsigned int stride = blockDim.x * gridDim.x;
 
-    float myrandf = curand_uniform(&(my_curandstate[index]));
-    myrandf *= (static_cast<int>(floorf(1.0f / activity)) + 0.999999); // between 0 and n_activity
-    int myrand = static_cast<int>(truncf(myrandf));
+    float myrandf;
+    int myrand;
 
     while (index < n) {
-        d_flags[index] = (0 == myrand);
+        curandState state;
+        curand_init(clock(), index, 0, &state);
+        d_flags[index] = (curand_uniform(&state) < activity);
         index += stride;
     }
 }
+
+
 
 int FLIF::nextID = 0;
 
@@ -77,14 +75,14 @@ void FLIF::initEF(int n, float upper, float lower, std::vector<float>& EF_vec) {
     }
 }
 
-void FLIF::initFlags(int n, float activity, bool* h_flags) {
+void FLIF::initFlags(int n, float activity, bool*& h_flags) {
     h_flags = new bool[n];
     for (int i = 0; i < n; i++) {
         h_flags[i] = (0 == (rand() % static_cast<int>(floorf(1.0f / activity))));
     }
 }
 
-void FLIF::initEF(int n, float upper, float lower, float* h_EF) {
+void FLIF::initEF(int n, float upper, float lower, float*& h_EF) {
     float temp;
     h_EF = new float[n];
 
@@ -95,11 +93,11 @@ void FLIF::initEF(int n, float upper, float lower, float* h_EF) {
     }
 }
 
-void FLIF::deleteFlags(bool* h_flags) {
+void FLIF::deleteFlags(bool*& h_flags) {
     delete[] h_flags;
 }
 
-void FLIF::deleteEF(float* h_EF) {
+void FLIF::deleteEF(float*& h_EF) {
     delete[] h_EF;
 }
 
@@ -113,17 +111,11 @@ void FLIF::updateFlags(std::vector<bool>& flag_vec,
     }
 }
 
-void FLIF::updateFlags(int n, bool* h_flags, const float& activity) {
+void FLIF::updateFlags(int n, bool*& h_flags, const float& activity) {
     for (int i = 0; i < n; i++) {
-        h_flags[i] = (0 == (rand() % static_cast<int>(floorf(1.0f / activity))));
+        if (activity > 0.0f)
+            h_flags[i] = (0 == (rand() % static_cast<int>(floorf(1.0f / activity))));
     }
-}
-
-void FLIF::updateFlagsGPU(int n, bool* d_flags, const float& activity) {
-    curandState* d_state;
-    cudaMalloc(&d_state, sizeof(curandState));
-    setupRandom_kernel <<<1,1>>> (d_state);
-    updateFlags_kernel <<<1,1>>> (d_state, n, d_flags, activity);
 }
 
 // Methods
@@ -172,7 +164,7 @@ int FLIF::num_fire(std::vector<bool>& firings) {
     return fire;
 }
 
-int FLIF::num_fire(int n, const bool* firings) {
+int FLIF::num_fire(int n, bool*& const firings) {
     int fire = 0;
     for (int i = 0; i < n; i++) {
         if (firings[i]) {
@@ -230,17 +222,23 @@ REC FLIF::setRecord(int available) {
     temp.available = available;
     if ((available | 0b0111) == 0b1111) {
         //std::cout << (this->flags).size() << std::endl;
-        temp.flags = this->flags;
+
+        //temp.flags = this->flags;
+        temp.flags = std::vector<bool>((this->h_flags), ((this->h_flags) + (this->n_neuron)));
+
     }
 
     if ((available | 0b1011) == 0b1111) {
         //std::cout << "rec2" << std::endl;
-        temp.energy = this->energy;
+        //temp.energy = this->energy;
+        temp.energy = std::vector<float>((this->h_energy), ((this->h_energy) + (this->n_neuron)));
+
     }
 
     if ((available | 0b1101) == 0b1111) {
         //std::cout << "rec3" << std::endl;
-        temp.fatigue = this->fatigue;
+        //temp.fatigue = this->fatigue;
+        temp.fatigue = std::vector<float>((this->h_fatigue), ((this->h_fatigue) + (this->n_neuron)));
     }
 
     if ((available | 0b1110) == 0b1111) {
@@ -251,10 +249,93 @@ REC FLIF::setRecord(int available) {
     return temp;
 }
 
-template<typename T>
-void FLIF::initDevice(int n, T* d_vec, const T* h_vec) {
-    cudaMalloc((void**)&d_vec, n*sizeof(T));
-    cudaMemcpy(d_vec, h_vec, n*sizeof(T), cudaMemcpyHostToDevice);
+//template<typename T>
+//void FLIF::initDevice(int n, T* d_vec, T* h_vec) {
+//    cudaMalloc((void**)&d_vec, n*sizeof(T));
+//    cudaMemcpy(d_vec, h_vec, n*sizeof(T), cudaMemcpyHostToDevice);
+//}
+
+cudaError_t FLIF::initBoolDevice(int n, bool*& d_vec, bool*& const h_vec, bool alloc) {
+    cudaError_t cudaStatus;
+    if (alloc) {
+        cudaStatus = cudaMalloc((void**)&d_vec, n * sizeof(bool));
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "bool cudaMalloc failed!");
+            return cudaStatus;
+        }
+    }
+
+    cudaStatus = cudaMemcpy(d_vec, h_vec, n * sizeof(bool), cudaMemcpyHostToDevice);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "bool h2d cudaMemcpy failed!");
+        return cudaStatus;
+    }
+    return cudaStatus;
+}
+
+cudaError_t FLIF::initIntDevice(int n, int*& d_vec, int*& const h_vec, bool alloc) {
+    cudaError_t cudaStatus;
+
+    if (alloc) {
+        cudaStatus = cudaMalloc((void**)&d_vec, n * sizeof(int));
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "int cudaMalloc failed!");
+            return cudaStatus;
+        }
+    }
+
+    cudaStatus = cudaMemcpy(d_vec, h_vec, n * sizeof(int), cudaMemcpyHostToDevice);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "int h2d cudaMemcpy failed!");
+        return cudaStatus;
+    }
+
+    return cudaStatus;
+}
+
+cudaError_t FLIF::initFloatDevice(int n, float*& d_vec, float*& const h_vec, bool alloc) {
+    cudaError_t cudaStatus;
+    if (alloc) {
+        cudaStatus = cudaMalloc((void**)&d_vec, n * sizeof(float));
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "float cudaMalloc failed!");
+            return cudaStatus;
+        }
+    }
+    cudaStatus = cudaMemcpy(d_vec, h_vec, n * sizeof(float), cudaMemcpyHostToDevice);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "flaot h2d cudaMemcpy failed!");
+        return cudaStatus;
+    }
+
+    return cudaStatus;
+}
+
+cudaError_t FLIF::freeBoolDevice(bool*& d_vec){
+    cudaError_t cudaStatus = cudaFree(d_vec);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "bool memory free failed!");
+        return cudaStatus;
+    }
+    return cudaStatus;
+}
+
+cudaError_t FLIF::freeIntDevice(int*& d_vec){
+    cudaError_t cudaStatus = cudaFree(d_vec);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "int memory free failed!");
+        return cudaStatus;
+    }
+    return cudaStatus;
+}
+
+cudaError_t FLIF::freeFloatDevice(float*& d_vec) {
+    cudaError_t cudaStatus = cudaFree(d_vec);
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "float memory free failed!");
+        return cudaStatus;
+    }
+    return cudaStatus;
 }
 
 template<typename T>
@@ -277,6 +358,7 @@ std::string FLIF::vectorToString(const std::vector<T>& vec) {
     }
     return temp;
 }
+
 
 template<typename T>
 void FLIF::vectorToCSV(std::ostream& file, const std::vector<T>& entry) {
@@ -313,7 +395,7 @@ std::string FLIF::getRecord(int timeStep) {
     temp += "timeStep " + std::to_string(timeStep) + "\n";
 
     if ((record[timeStep].available | 0b0111) == 0b1111) {
-        temp += "\nFlags ["+ std::to_string(activity) +"] : ";
+        temp += "\nFlags ";
         temp += "(" + std::to_string(num_fire(record[timeStep].flags)) +
             "/" + std::to_string(n_neuron) + ")\n";
         temp += vectorToString<bool>(record[timeStep].flags);

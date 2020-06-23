@@ -1,61 +1,133 @@
-﻿  Compiling CUDA source file Synapse.cu...
+﻿  Compiling CUDA source file Controller.cu...
   
-  C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\bin\HostX86\x64" -x cu  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\Synapse.cu.obj "C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cu" 
-C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(55): warning : type qualifier on a reference type is not allowed
+  C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\bin\nvcc.exe" -gencode=arch=compute_50,code=\"sm_50,compute_50\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.24.28314\bin\HostX86\x64" -x cu -rdc=true -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart shared  -g   -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc142.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\Controller.cu.obj "C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Controller.cu" 
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\FLIF.cuh(108): warning : type qualifier on a reference type is not allowed
   
-C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(70): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\FLIF.cuh(109): warning : type qualifier on a reference type is not allowed
   
-C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(72): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\FLIF.cuh(110): warning : type qualifier on a reference type is not allowed
   
-C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(95): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\FLIF.cuh(132): warning : type qualifier on a reference type is not allowed
   
-C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(105): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(67): warning : type qualifier on a reference type is not allowed
   
-C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(106): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(74): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(189): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(78): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(190): warning : variable "indice" was declared but never referenced
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(90): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(191): warning : variable "counter" was declared but never referenced
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(92): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(296): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(115): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(298): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(125): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(405): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(126): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(481): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(62): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(527): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(63): warning : type qualifier on a reference type is not allowed
   
-C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(55): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(73): warning : type qualifier on a reference type is not allowed
   
-C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(70): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(74): warning : type qualifier on a reference type is not allowed
   
-C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(72): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(85): warning : type qualifier on a reference type is not allowed
   
-C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(95): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(86): warning : type qualifier on a reference type is not allowed
   
-C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(105): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(87): warning : type qualifier on a reference type is not allowed
   
-C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(106): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(95): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(189): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(96): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(296): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(97): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(298): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(101): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(405): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Value.cuh(34): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(481): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Value.cuh(39): warning : type qualifier on a reference type is not allowed
   
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(527): warning : type qualifier on a reference type is not allowed
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\FLIF.cuh(108): warning : type qualifier on a reference type is not allowed
   
-  Synapse.cu
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(163): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(394): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(419): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Synapse.cu(472): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\FLIF.cuh(109): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\FLIF.cuh(110): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\FLIF.cuh(132): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(67): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(74): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(78): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(90): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(92): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(115): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(125): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Synapse.cuh(126): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(62): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(63): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(73): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(74): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(85): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(86): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(87): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(95): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(96): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(97): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\CA.cuh(101): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Value.cuh(34): warning : type qualifier on a reference type is not allowed
+  
+C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens\Value.cuh(39): warning : type qualifier on a reference type is not allowed
+  
+  Controller.cu
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Controller.cu(26): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Controller.cu(147): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:/Users/ugurc/Google Drive/current/mmi713/project/phase3/CANQueens/src/CANQueens/CANQueens/Controller.cu(185): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  
+  C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\CANQueens>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\bin\nvcc.exe" -dlink -o x64\Debug\CANQueens.device-link.obj -Xcompiler "/EHsc /W3 /nologo /Od /Zi /RTC1 /MDd " -L"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.2\lib\x64" cudart_static.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib cudadevrt.lib  -gencode=arch=compute_50,code=sm_50 -G --machine 64 x64\Debug\Board.cu.obj x64\Debug\CA.cu.obj x64\Debug\Explore.cu.obj x64\Debug\Controller.cu.obj x64\Debug\FLIF.cu.obj x64\Debug\main.cu.obj x64\Debug\Memory.cu.obj x64\Debug\Synapse.cu.obj x64\Debug\Value.cu.obj 
+  cudart_static.lib
+  kernel32.lib
+  user32.lib
+  gdi32.lib
+  winspool.lib
+  comdlg32.lib
+  advapi32.lib
+  shell32.lib
+  ole32.lib
+  oleaut32.lib
+  uuid.lib
+  odbc32.lib
+  odbccp32.lib
+  cudadevrt.lib
+  Board.cu.obj
+  CA.cu.obj
+  Explore.cu.obj
+  Controller.cu.obj
+  FLIF.cu.obj
+  main.cu.obj
+  Memory.cu.obj
+  Synapse.cu.obj
+  Value.cu.obj
   CANQueens.vcxproj -> C:\Users\ugurc\Google Drive\current\mmi713\project\phase3\CANQueens\src\CANQueens\x64\Debug\CANQueens.exe

@@ -28,27 +28,21 @@ Memory::Memory(int n, float activity, float connectivity, float inhibitory, floa
     this -> w_current = 1.0f;
 
     // Neurons
-    initFlags(n, activity, this->flags);
-    initWeights(n, n, connectivity, inhibitory, this->weights);
+    //initFlags(n, activity, this->flags);
+    initFlags(n, activity, this->h_flags);
+
+
+    //initWeights(n, n, connectivity, inhibitory, this->weights);
+    initWeights(n, n, connectivity, inhibitory, this->h_weights);
 }
 
 Memory::~Memory() {
     std::cout << "Memory destructed" << std::endl;
 }
 
-void Memory::update(float act) {
-    /* Update the CA by updating neuron related data structures
-     * ! pre_synaptic and post_synaptic not in use
-     */
-    if (act >= 0.0f && act < 1.0f) {
-        setActivity(act);
-    }
-    updateWeights(this->weights, this->flags, this->flags, this->alpha, this->w_average, this->w_current);
-    updateFlags(this->flags, this->activity);
-}
 
 // Running
-void Memory::runFor(int timeStep, int available) {
+void Memory::runFor_CPU(int timeStep, int available) {
     /* Run the CA for defined timestep and record the activity
      * Implemented for raster plot drawing
      *
@@ -57,23 +51,103 @@ void Memory::runFor(int timeStep, int available) {
      *          number of steps to stop running
      */
     for (int i = 0; i < timeStep; i++) {
+        CSCToDense(this->weights, this->h_weights);
         record.push_back(setRecord(available));
-        //std::cout << record[0].energy.size() << std::endl;
-        update();
+        update_CPU();
     }
 
 }
 
-void Memory::POC() {
+// Running
+void Memory::runFor_GPU(int timeStep, int available) {
+    /* Run the CA for defined timestep and record the activity
+     * Implemented for raster plot drawing
+     *
+     * Parameters:
+     *      timestep(int):
+     *          number of steps to stop running
+     */
+    for (int i = 0; i < timeStep; i++) {
+        getDeviceToHostCSC(this->h_weights, this->d_weights);
+        cudaMemcpy(this->h_flags, this->d_flags, (this->n_neuron) * sizeof(bool), cudaMemcpyDeviceToHost);
+        CSCToDense(this->weights, this->h_weights);
+
+        record.push_back(setRecord(available));
+        update_GPU();
+    }
+
+}
+
+void Memory::update_CPU(float act) {
+    /* Update the CA by updating neuron related data structures
+     * ! pre_synaptic and post_synaptic not in use
+     */
+    if (act >= 0.0f && act < 1.0f) {
+        setActivity(act);
+    }
+    //updateWeights(this->weights, this->flags, this->flags, this->alpha, this->w_average, this->w_current);
+    updateWeights(this->h_weights, this->n_neuron, this->h_flags, this->n_neuron, this->h_flags, this->alpha, this->w_average, this->w_current);
+
+    //updateFlags(this->flags, this->activity);
+    updateFlags(this->n_neuron, this->h_flags, this->activity);
+
+}
+
+
+void Memory::update_GPU(float act) {
+    /* Update the CA by updating neuron related data structures
+     * ! pre_synaptic and post_synaptic not in use
+     */
+    dim3 gridSize = 1;
+    dim3 blockSize = this->n_neuron; // Limitted to 1024
+
+    if (act >= 0.0f && act < 1.0f) {
+        setActivity(act);
+    }
+    updateWeights_kernel << <gridSize, blockSize >> > (this->n_neuron, 
+        this->d_flags, 
+        this->n_neuron, 
+        this->d_flags, 
+        this->alpha,
+        this->w_average,
+        this->w_current,
+        this->d_weights->CO,
+        this->d_weights->RI,
+        this->d_weights->data);
+    updateFlags_kernel << <gridSize, blockSize >> > (this->n_neuron, this->d_flags, this->activity);
+}
+
+void Memory::POC_CPU() {
     int timeStep = 10;
+    std::cout << "MEMORY CPU" << std::endl;
+
     Memory* myMEM;
-    myMEM = new Memory(3);
+    myMEM = new Memory(10);
 
-    myMEM->runFor(timeStep);
+    myMEM->runFor_CPU(timeStep);
+    myMEM->setActivity(0.1);
+    myMEM->runFor_CPU(timeStep);
+
     std::cout << myMEM->getActivity() << std::endl;
+}
 
+void Memory::POC_GPU() {
+    int timeStep = 10;
+    std::cout << "MEMORY GPU" << std::endl;
+
+    Memory* myMEM;
+    myMEM = new Memory(10);
+
+    myMEM->initMemoryGPU();
+
+    myMEM->runFor_GPU(timeStep);
     myMEM->setActivity(0.1);
 
-    myMEM->runFor(timeStep);
+    myMEM->runFor_GPU(timeStep);
     std::cout << myMEM->getActivity() << std::endl;
+}
+
+void Memory::initMemoryGPU() {
+    this->initBoolDevice(this->n_neuron, this->d_flags, this->h_flags);
+    this->initCSCDevice(this->d_weights, this->h_weights);
 }

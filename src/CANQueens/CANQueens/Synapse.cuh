@@ -16,6 +16,18 @@
 
 #include "FLIF.cuh"
 
+ // CUDA KERNELS
+__global__ void updateWeights_kernel(const int pre_size, 
+    bool* const d_preFlags,
+    const int post_size,
+    bool* const d_postFlags,
+    const float alpha,
+    const float w_average,
+    const float w_current,
+    int* const CO,
+    int* const RI,
+    float* data);
+
 class Synapse : public FLIF{
 private:
 
@@ -54,8 +66,16 @@ protected:
     void COOToCSC(CSC*& target, const std::vector<COO>& source, int row, int col);
     void CSCToDense(std::vector<std::vector<float>>& target,  CSC*& const source);
     float getDataCSC(CSC*& target, int i, int j);
+    void setDataCSC(CSC*& target, int i, int j, const float& data);
     CSC* initCSC(int rowSize, int columnSize, int nonzeros);
     void deleteCSC(CSC*& target);
+
+    // Device Inits
+    cudaError_t initCSCDevice(CSC*& d_CSC, CSC*& const h_CSC, bool allocHost=true, bool alloc = true);
+    cudaError_t freeCSCDevice(CSC*& d_CSC);
+
+    // Decvice to host
+    cudaError_t getDeviceToHostCSC(CSC*& h_CSC, CSC*& const d_CSC);
 
     // Update
     void updateWeights(std::vector<std::vector<float>>& weight_vec,
@@ -118,6 +138,10 @@ public:
         float inhibitory);
     static void connect(Synapse* pre_synaptic, float pre_strength, float pre_inhibitory,
                         Synapse* post_synaptic, float post_strength, float post_inhibitory);
+
+    static void connect_GPU(Synapse* pre_synaptic, float pre_strength, float pre_inhibitory, Synapse* post_synaptic, float post_strength, float post_inhibitory);
+
+    void connectRestore_GPU();
 
     static void POC();
 };
