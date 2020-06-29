@@ -45,15 +45,17 @@ protected:
     // Host Flags
     int preSize;
     int postSize;
+
     bool* h_preFlags;
     bool* h_postFlags;
 
     // Device Flags
-    bool* d_preFlags;
+    bool* d_preFlags; 
     bool* d_postFlags;
 
     std::vector<FLIF*> incomingList;
     std::vector<FLIF*> outgoingList;
+    
 
     // Init === FLIF
     void initWeights(int in, int out, float connectivity, float inhibitory,
@@ -128,7 +130,7 @@ protected:
 public:
     Synapse();
     ~Synapse();
-
+    
     // Connecting
     void connectIn(FLIF* incoming,
         float strength,
@@ -144,6 +146,11 @@ public:
     void connectRestore_GPU();
 
     static void POC();
+
+
+
+    
+
 };
 
 #endif // SYNAPSE_H

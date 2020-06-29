@@ -27,12 +27,12 @@ protected:
     // Data
     int row; // n
     int col; // log2n
-    CA** board;
+    CA*** board;
     int* chromosome;
 
     // Initiation - Destruction
-    CA** initiateBoard(int row, int col);
-    void deleteBoard(CA** board, int row);
+    CA*** initiateBoard(int row, int col);
+    void deleteBoard(CA*** board, int row);
     int* initiateCh(int row);
     void deleteCh(int* chromosome);
 
@@ -54,8 +54,10 @@ public:
     enum class PrintType { full, comp, chrom };
     std::string toString(PrintType type);
     void connect_CPU(FLIF* pre_synaptic, float inhibitory = 0.0f, float strength = 1.0f, float rate = 1.0f);
+    void setMemory_CPU(Synapse* memory, float inhibitory=0.0f, float strength=0.2f);
 
     void connect_GPU(FLIF* pre_synaptic, float inhibitory = 0.0f, float strength = 1.0f, float rate = 1.0f);
+    void setMemory_GPU(Synapse* pre_synaptic, float inhibitory = 0.0f, float strength = 1.0f);
 
     // Update
     void update_CPU();

@@ -60,7 +60,7 @@ void Explore::update_GPU(float act) {
      */
 
     dim3 gridSize = 1;
-    dim3 blockSize = this->n_neuron; // Limitted to 1024
+    dim3 blockSize = this->n_neuron; // Limitted to 1024.
     
     if (act >= 0.0f && act < 1.0f) {
         setActivity(act);

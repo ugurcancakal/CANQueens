@@ -573,13 +573,13 @@ void Synapse::updateWeights(CSC*& h_weights,
 
     if (*(h_weights->columnSize) != postSize) {
         std::cout << "Weight matrix width(" << *(h_weights->columnSize) 
-            <<") is different than post synaptic vector size"<<(postSize)
+            <<") is different than post synaptic vector size:: "<<(postSize)
             <<"!" << std::endl;
         //return;
     }
     if (*(h_weights->rowSize) != preSize) {
         std::cout << "Weight matrix height(" << *(h_weights->rowSize) 
-            <<") is different than pre synaptic vector size(" << preSize 
+            <<") is different than pre synaptic vector size:: (" << preSize 
             <<")!" << std::endl;
         //return;
     }

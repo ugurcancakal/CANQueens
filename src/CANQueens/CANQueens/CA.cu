@@ -78,7 +78,7 @@ __global__ void updateE_kernel(int n, float* d_energy, int c_decay, float* produ
     unsigned int index = threadIdx.x + blockDim.x * blockIdx.x;
     unsigned int stride = blockDim.x * gridDim.x;
     while (index < n) {    
-        dotP_kernel << <1, 1, n >> > (product, CO[index], CO[index + 1], RI, data, d_flags);
+        dotP_kernel << <1, CO[index + 1]- CO[index], n >> > (product, CO[index], CO[index + 1], RI, data, d_flags);
         
         if (d_flags[index]) {  
             d_energy[index] = *product;
@@ -113,11 +113,23 @@ __global__ void updateF_kernel(int n, float* d_fatigue, bool* const d_flags, flo
 // Default values for CA initiation
 int CA::d_n_neuron = 10;
 float CA::d_activity = 0.5f;
-float CA::d_connectivity = 1.0f;
+float CA::d_connectivity = 0.5f;
 float CA::d_inhibitory = 0.2f;
 float CA::d_threshold = 0.3f;
-float CA::d_C[7] = { 1.0, 4.0, 0.25, 1.0, 0.2, 1.0, 1.0 };
-int CA::d_available = 0b1111;
+float CA::d_C[7] = { 5.0, 0.5, 0.5, 1.0, 0.0, 1.0, 1.0 };
+
+/*C[7](float*) :
+ *
+ *C[0]:theta; // firing threshold
+ *C[1]:c_decay; // decay constant d
+ *C[2]:f_recover; // recovery constant F^R
+ *C[3]:f_fatigue; // fatigue constant F^C
+ *C[4]:alpha; // learning rate
+ *C[5]:w_average; // constant representing average total synaptic strength of the pre-synaptic neuron.
+ *C[6]:w_current; // current total synaptic strength
+ */
+
+ int CA::d_available = 0b1111;
 
 // PROTECTED MEMBERS
 // Updates
@@ -657,14 +669,14 @@ void CA::update_GPU() {
     //this->ignition = num_fire(this->flags) > (this->n_threshold);
 
     dim3 gridSize = 1;
-    dim3 blockSize = this->n_neuron; // Limitted to 1024
+    dim3 blockSize = this->n_neuron; // Limitted to 1024.
     cudaError_t cudaStatus;
     
     cudaStatus = updatePreGPU();
     cudaStatus = updatePostGPU();
-    cudaStatus = updateE_GPU(gridSize, blockSize);
+    cudaStatus = updateE_GPU(this->postSize, this->preSize);
     cudaStatus = updateF_GPU(gridSize, blockSize);
-    cudaStatus = updateWeights_GPU(gridSize, blockSize);
+    cudaStatus = updateWeights_GPU(this->postSize, this->preSize);
     cudaStatus = updatePhi_GPU(gridSize, blockSize);
     this->ignition = num_fire(this->n_neuron, this->h_flags) > (this->n_threshold);
 }

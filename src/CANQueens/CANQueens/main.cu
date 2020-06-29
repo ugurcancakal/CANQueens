@@ -23,8 +23,6 @@ int main(int argc, char** argv) {
 	srand(time(0));
 
 	std::cout << "Welcome to CANQueens Project" << std::endl;
-	
-	// 202605 ONEMLI
 
 	// 200619
 	//Synapse::POC();
@@ -34,13 +32,13 @@ int main(int argc, char** argv) {
 	// Explore::POC_GPU();
 	// Memory::POC_CPU();
 	// Memory::POC_GPU();
-	// Board::POC_CPU();
+	// Board::POC_CPU(); 
 	 //Board::POC_GPU();
 	 //Controller::POC_CPU();
-	 //Controller::POC_GPU();
+	 Controller::POC_GPU();
 
-	//experimentCPU(10);
-	experimentGPU(10);
+	//experimentCPU(50);
+	//experimentGPU(50);
 	
 	// 201621 GPU
 	// cudaDeviceReset must be called before exiting in order for profiling and
@@ -121,11 +119,16 @@ double experimentCPU(int repeat) {
 	double cpu_elapsed_time = 0.0;
 	double average_time = 0.0;
 	int exp = 0;
-	int n = 8;
+	int n = 32;
 	int printCount = (int)repeat / 10.0;
 
 	printf("\nTiming Experiment CPU");
 	Controller CANQueen = Controller::getControllerCPU(n);
+	CA* myCA1 = new CA(25);
+	myCA1->initCADevice();
+
+	//
+
 	while (exp <= repeat) {
 		if (exp % printCount == 0) {
 			printf("\nREPEAT: %d", exp);
@@ -134,12 +137,14 @@ double experimentCPU(int repeat) {
 		startCounter(PCFreq, CounterStart);
 
 		// Do the operations
-		CANQueen.runFor_CPU(100);
+		CANQueen.runFor_CPU(10);
+		//myCA1->runFor_CPU(10);
+		
 		cpu_elapsed_time = getCounter(PCFreq, CounterStart);
 		average_time += cpu_elapsed_time;
 		exp++;
 	}
-
+	//std::cout << myCA1->getActivity() << std::endl;
 	average_time /= exp;
 	printf("\nAverage Time for 1 step: %f", average_time);
 	// Cleaning
@@ -183,29 +188,15 @@ float experimentGPU(int repeat) {
 	float average_time = 0.0f;
 	int exp = 0;
 	int printCount = (int)repeat / 10.0;
-	int n = 8;
+	int n = 32;
 
 	Controller CANQueen = Controller::getControllerGPU(n);
+
+	CA* myCA1 = new CA(25);
+	myCA1->initCADevice();
+
 	printf("\nTiming Experiment GPU");
 	printf("\nTotal Repetition: \t%d\n\n", repeat);
-
-	// Do the operations
-	//dim3 blockSize; // Limitted to 1024
-	//dim3 gridSize;
-	//dim3 gridSizeMinMax;
-	//size_t s_memSize = num_threads * sizeof(Npp8u);
-	//blockSize.x = blockWidth;
-	//blockSize.y = num_threads / blockSize.x;
-	//gridSize.x = width / blockSize.x;
-	//gridSize.y = height / blockSize.y;
-	//gridSizeMinMax.x = width / blockSize.x;
-	//gridSizeMinMax.y = height / (blockSize.y * 2);
-
-	//printf("\nthreads/block \t: %d", num_threads);
-	//printf("\nblockSize.x \t: %d", blockSize.x);
-	//printf("\nblockSize.y \t: %d", blockSize.y);
-	//printf("\ngridSize.x \t: %d", gridSize.x);
-	//printf("\ngridSize.y \t: %d\n", gridSize.y);
 
 	// Timing variables
 	float gpu_elapsed_time = 0.0;
@@ -220,7 +211,8 @@ float experimentGPU(int repeat) {
 		cudaEventRecord(gpu_start, 0);
 
 		// Do the operations
-		CANQueen.runFor_GPU(100);
+		CANQueen.runFor_GPU(10);
+		//myCA1->runFor_GPU(10);
 
 		cudaThreadSynchronize();
 

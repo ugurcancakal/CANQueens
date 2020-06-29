@@ -44,7 +44,7 @@ int Board::history = 0;
 // PRIVATE MEMBERS
 // Initiation - Destruction
 
-CA** Board::initiateBoard(int row, int col) {
+CA*** Board::initiateBoard(int row, int col) {
     /* Initiate a CA board using dynamic memory.
      * !!!Requires memory REALLOCATION
      *
@@ -58,15 +58,18 @@ CA** Board::initiateBoard(int row, int col) {
      *      board(CA**):
      *          A CA board in a 2D dynamic array structure
      */
-    CA** board;
-    board = new CA * [row];
+    CA*** board;
+    board = new CA** [row];
     for (int i = 0; i < row; ++i) {
-        board[i] = new CA[col];
+        board[i] = new CA*[col];
+        for (int j = 0; j < col; j++) {
+            board[i][j] = new CA();
+        }
     }
     return board;
 }
 
-void Board::deleteBoard(CA** board, int row) {
+void Board::deleteBoard(CA*** board, int row) {
     /* Reallocate the memory used for CA board 
      *
      * Parameters:
@@ -76,6 +79,9 @@ void Board::deleteBoard(CA** board, int row) {
      *          number of rows in the CA board of interest
      */
     for (int i = 0; i < row; ++i) {
+        for (int j = 0; j < col; j++) {
+            delete board[i][j];
+        }
         delete[] board[i];
     }
     delete[] board;
@@ -174,7 +180,7 @@ std::string Board::compressedBoard() {
     for (int i = 0; i < row; i++) {
         temp += std::to_string(i) + "|\t";
         for (int j = 0; j < col; j++) {
-            if (board[i][j].getIgnition())
+            if (board[i][j]->getIgnition())
                 temp += "*\t";
             else
                 temp += "\t";
@@ -218,7 +224,7 @@ void Board::boardToCh() {
     int temp = 0;
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
-            if (board[i][j].getIgnition())
+            if (board[i][j]->getIgnition())
                 temp += static_cast<int>(powf(2, (col - j - 1)));
         }
         chromosome[i] = temp;
@@ -336,20 +342,39 @@ void Board::connect_CPU(FLIF* pre_synaptic, float inhibitory, float strength, fl
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
             if (0 == (rand() % static_cast<int>(floorf(1.0f / rate)))) {
-                board[i][j].connectIn(pre_synaptic, strength, inhibitory);
+                board[i][j]->connectIn(pre_synaptic, strength, inhibitory);
             }         
         }
     }
 }
+
+void Board::setMemory_CPU(Synapse* memory, float inhibitory, float strength) {
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            memory->connectOut(board[i][j], strength, inhibitory);
+        }
+    }
+}
+
+
 
 
 void Board::connect_GPU(FLIF* pre_synaptic, float inhibitory, float strength, float rate) {
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
             if (0 == (rand() % static_cast<int>(floorf(1.0f / rate)))) {
-                board[i][j].connectIn(pre_synaptic, strength, inhibitory);
-                board[i][j].connectRestore_GPU();
+                board[i][j]->connectIn(pre_synaptic, strength, inhibitory);
+                board[i][j]->connectRestore_GPU();
             }
+        }
+    }
+}
+
+void Board::setMemory_GPU(Synapse* memory, float inhibitory, float strength) {
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            memory->connectOut(board[i][j], strength, inhibitory);
+            memory->connectRestore_GPU();
         }
     }
 }
@@ -361,7 +386,7 @@ void Board::update_CPU() {
      */
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
-            board[i][j].update_CPU();  
+            board[i][j]->update_CPU();  
         }
     }
     boardToCh(); 
@@ -371,7 +396,7 @@ void Board::runFor_CPU(int timeStep) {
     for (int t = 0; t < timeStep; t++) {
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
-                board[i][j].runFor_CPU(1);
+                board[i][j]->runFor_CPU(1);
             }
         }
         history++;
@@ -387,7 +412,7 @@ void Board::update_GPU() {
      */
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
-            board[i][j].update_GPU();
+            board[i][j]->update_GPU();
         }
     }
     boardToCh();
@@ -397,7 +422,7 @@ void Board::runFor_GPU(int timeStep) {
     for (int t = 0; t < timeStep; t++) {
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
-                board[i][j].runFor_GPU(1);
+                board[i][j]->runFor_GPU(1);
             }
         }
         history++;
@@ -429,7 +454,7 @@ std::string Board::getActivity(int stop, int start) {
     }
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
-            temp+= board[i][j].getActivity(stop, start);
+            temp+= board[i][j]->getActivity(stop, start);
         }
     }
     
@@ -444,11 +469,11 @@ void Board::saveCSV(char* filename, float threshold, int stop, int start) {
         ERROR_ALREADY_EXISTS == GetLastError()) {
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < col; j++) {
-                temp = ca + "/CA" + std::to_string(board[i][j].getID());
+                temp = ca + "/CA" + std::to_string(board[i][j]->getID());
                 if (CreateDirectory(temp.c_str(), NULL) ||
                     ERROR_ALREADY_EXISTS == GetLastError()) {
-                    temp+= "/CA_ID_" + std::to_string(board[i][j].getID());
-                    board[i][j].saveCSV(strdup(temp.c_str()), threshold, stop, start);
+                    temp+= "/CA_ID_" + std::to_string(board[i][j]->getID());
+                    board[i][j]->saveCSV(strdup(temp.c_str()), threshold, stop, start);
                 }
                 else {
                     std::cout << temp << " directory could not created!" << std::endl;
@@ -483,7 +508,7 @@ void Board::POC_GPU() {
 void Board::initBoardGPU() {
     for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
-            this->board[i][j].initCADevice();
+            this->board[i][j]->initCADevice();
         }
     }
 }

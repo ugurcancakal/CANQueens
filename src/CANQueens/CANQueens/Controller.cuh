@@ -34,7 +34,7 @@ protected:
     Board* board;
     Value* value;
     Explore* explore;
-    Memory* memory;
+    
     int* chromosome;
 
     std::vector<VAL> valueRec;
@@ -57,8 +57,6 @@ public:
     std::string toString();
     //CUDA_CALLABLE_MEMBER std::string toString();
     void saveLog();
-    void connect_CPU();
-    void connect_GPU();
 
 
     static void POC_CPU();
@@ -66,6 +64,8 @@ public:
 
     static Controller getControllerCPU(int n);
     static Controller getControllerGPU(int n);
+
+    Memory* memory;
 };
 
 #endif // CONTROLLER_H

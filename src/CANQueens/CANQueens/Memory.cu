@@ -14,7 +14,6 @@ float Memory::d_inhibitory = 0.2f;
 float Memory::d_alpha = 0.2f;
 int Memory::d_available = 0b1001;
 
-
 Memory::Memory(int n, float activity, float connectivity, float inhibitory, float alpha) {
     //std::cout << "Memory constructed" << std::endl;
 
@@ -30,7 +29,10 @@ Memory::Memory(int n, float activity, float connectivity, float inhibitory, floa
     // Neurons
     //initFlags(n, activity, this->flags);
     initFlags(n, activity, this->h_flags);
-
+    initFlags(n, activity, this->h_preFlags);
+    initFlags(n, activity, this->h_postFlags);
+    this->incomingList.push_back(this);
+    this->outgoingList.push_back(this);
 
     //initWeights(n, n, connectivity, inhibitory, this->weights);
     initWeights(n, n, connectivity, inhibitory, this->h_weights);
@@ -85,8 +87,10 @@ void Memory::update_CPU(float act) {
     if (act >= 0.0f && act < 1.0f) {
         setActivity(act);
     }
+    updatePre(this->h_preFlags, this->preSize, this->incomingList);
+    updatePost(this->h_postFlags, this->postSize, this->outgoingList);
     //updateWeights(this->weights, this->flags, this->flags, this->alpha, this->w_average, this->w_current);
-    updateWeights(this->h_weights, this->n_neuron, this->h_flags, this->n_neuron, this->h_flags, this->alpha, this->w_average, this->w_current);
+    updateWeights(this->h_weights, this->preSize, this->h_preFlags, this->postSize, this->h_postFlags, this->alpha, this->w_average, this->w_current);
 
     //updateFlags(this->flags, this->activity);
     updateFlags(this->n_neuron, this->h_flags, this->activity);
@@ -98,22 +102,36 @@ void Memory::update_GPU(float act) {
     /* Update the CA by updating neuron related data structures
      * ! pre_synaptic and post_synaptic not in use
      */
-    dim3 gridSize = 1;
-    dim3 blockSize = this->n_neuron; // Limitted to 1024
+
+    cudaError_t cudaStatus;
+    updatePre(this->h_preFlags, this->preSize, this->incomingList);
+    cudaStatus = freeBoolDevice(this->d_preFlags);
+    cudaStatus = initBoolDevice(this->preSize, this->d_preFlags, this->h_preFlags);
+    
+    updatePost(this->h_postFlags, this->postSize, this->outgoingList);
+    cudaStatus = freeBoolDevice(this->d_postFlags);
+    cudaStatus = initBoolDevice(this->postSize, this->d_postFlags, this->h_postFlags);
+    
+    dim3 gridSize = this->postSize;
+    dim3 blockSize = this->preSize; // Limitted to 1024.
 
     if (act >= 0.0f && act < 1.0f) {
         setActivity(act);
     }
-    updateWeights_kernel << <gridSize, blockSize >> > (this->n_neuron, 
-        this->d_flags, 
-        this->n_neuron, 
-        this->d_flags, 
+    updateWeights_kernel << <gridSize, blockSize >> > (this->preSize,
+        this->d_preFlags,
+        this->postSize,
+        this->d_postFlags,
         this->alpha,
         this->w_average,
         this->w_current,
         this->d_weights->CO,
         this->d_weights->RI,
         this->d_weights->data);
+
+    gridSize = 1;
+    blockSize = this->n_neuron;
+
     updateFlags_kernel << <gridSize, blockSize >> > (this->n_neuron, this->d_flags, this->activity);
 }
 
@@ -149,5 +167,7 @@ void Memory::POC_GPU() {
 
 void Memory::initMemoryGPU() {
     this->initBoolDevice(this->n_neuron, this->d_flags, this->h_flags);
+    this->initBoolDevice(this->n_neuron, this->d_preFlags, this->h_preFlags);
+    this->initBoolDevice(this->n_neuron, this->d_postFlags, this->h_postFlags);
     this->initCSCDevice(this->d_weights, this->h_weights);
 }

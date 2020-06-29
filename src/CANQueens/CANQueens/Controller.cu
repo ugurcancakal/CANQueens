@@ -53,8 +53,8 @@ Controller::Controller(int n) {
 void Controller::step_CPU() {
     VAL temp;
     // Show Board
-    /*std::cout << board->toString(Board::PrintType::full) << std::endl;
-    std::cout << board->toString(Board::PrintType::chrom) << std::endl;*/
+    //std::cout << board->toString(Board::PrintType::full) << std::endl;
+    //std::cout << board->toString(Board::PrintType::chrom) << std::endl;
     std::vector<int> chVec(board->getChromosome(), board->getChromosome() + n_neuron);
     choromosomeRec.push_back(chVec);
     
@@ -307,13 +307,14 @@ void Controller::POC_GPU() {
     int n = 8;
     Controller CANQueen = getControllerGPU(n);
     CANQueen.runFor_GPU(10);
-    //CANQueen.saveLog();
+    CANQueen.saveLog();
 
 }
 
 Controller Controller::getControllerCPU(int n){
     Controller CANQueen(n);
     CANQueen.board->connect_CPU(CANQueen.memory);
+    CANQueen.board->setMemory_CPU(CANQueen.memory);
     CANQueen.board->connect_CPU(CANQueen.explore);
 
     return CANQueen;
@@ -325,6 +326,7 @@ Controller Controller::getControllerGPU(int n) {
     CANQueen.memory->initMemoryGPU();
     CANQueen.board->initBoardGPU();
     CANQueen.board->connect_GPU(CANQueen.memory);
+    CANQueen.board->setMemory_GPU(CANQueen.memory);
     CANQueen.board->connect_GPU(CANQueen.explore);
     return CANQueen;
 }
