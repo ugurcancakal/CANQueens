@@ -14,15 +14,30 @@
 #ifndef EXPLORE_H
 #define EXPLORE_H
 
-#include <string>
-#include <iostream>
+#include "FLIF.cuh"
 
-class Explore {
+class Explore : public FLIF{
+private:
+    static int d_n_neuron;
+    static float d_activity;
+    static int d_available;    
+
 public:
-    Explore();
+    Explore(int n = d_n_neuron,
+            float activity = d_activity);
     ~Explore();
-    std::string toString();
-    //CUDA_CALLABLE_MEMBER std::string toString();
+
+    // Running
+    void runFor_CPU(int timeStep, int available = d_available);
+    void update_CPU(float act = -1.0f);
+
+    void runFor_GPU(int timeStep, int available = d_available);
+    void update_GPU(float act = -1.0f);
+    
+    // Proof of Concept
+    static void POC_CPU();
+    static void POC_GPU();
+    void initExploreGPU();
 };
 
 #endif // EXPLORE_H

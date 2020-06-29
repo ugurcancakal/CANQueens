@@ -5,12 +5,16 @@
 #include <cstdlib>
 
 #include "CA.cuh"
-#include "FLIF.cuh"
+#include "Controller.cuh"
 #include "Board.cuh"
 #include "Memory.cuh"
 #include "Explore.cuh"
 #include "Value.cuh"
-#include "Chromosome.cuh"
+
+void startCounter(double& PCFreq, __int64& CounterStart);
+double getCounter(double& PCFreq, __int64& CounterStart);
+double experimentCPU(int repeat);
+float experimentGPU(int repeat);
 
 int main(int argc, char** argv) {
 	/* Functions here are implemented to save the space in the main function.
@@ -20,172 +24,216 @@ int main(int argc, char** argv) {
 
 	std::cout << "Welcome to CANQueens Project" << std::endl;
 
-	//for (int i = 0; i < 50; i++) {
-	//	CA myCA;
-	//	std::cout << myCA.getID() << std::endl;
-	//	std::cout << myCA.getIgnition() << std::endl;
-	//	std::cout << myCA.toString() << std::endl;
-	//}
+	// 200619
+	//Synapse::POC();
+	// CA::POC_CPU();
+	// CA::POC_GPU();
+	// Explore::POC_CPU();
+	// Explore::POC_GPU();
+	// Memory::POC_CPU();
+	// Memory::POC_GPU();
+	// Board::POC_CPU(); 
+	 //Board::POC_GPU();
+	 //Controller::POC_CPU();
+	 Controller::POC_GPU();
 
-
-	//FLIF myFLIF;
-	//std::cout << myFLIF.toString() << std::endl;
-
-	int n = 8;
-	int* chromosome;
-	Board myBoard(n);
-	//CA** board = myBoard.getBoard();
-	//std::cout << board[2][3].getID() << std::endl;
-	std::cout << myBoard.toString(Board::PrintType::chrom) << std::endl;
-	std::cout << myBoard.toString(Board::PrintType::comp) << std::endl;
-	std::cout << myBoard.toString(Board::PrintType::full) << std::endl;
+	//experimentCPU(50);
+	//experimentGPU(50);
 	
-	// 202605 ONEMLI
-	// 3 bit olursa ama n = 8 olmazsa yasakli bitleri belirlemek gerek
-	// Cok buyuk ceza verilebilir
-	// Modulo falan olabilir
-	chromosome = myBoard.getChromosome();
-	std::string temp = "\n";
-	for (int i = 0; i < n; i++) {
-		temp += std::to_string(i) + "| " + std::to_string(chromosome[i]) + " |\n";
-	}
-	std::cout << temp << std::endl;
-
-	//Memory myMemory;
-	//std::cout << myMemory.toString() << std::endl;
-	//int k = 5;
-	//Value myValue(k);
-	//int* chromosome = new int[k];
-	//chromosome[0] = 3;
-	//chromosome[1] = 1;
-	//chromosome[2] = 4;
-	//chromosome[3] = 0;
-	//chromosome[4] = 3;
-	Value myValue(n);
-	std::cout << myValue.toString() << std::endl;
-	myValue.update(chromosome);
-
-	//Explore myExplore;
-	//std::cout << myExplore.toString() << std::endl;
-
-	//Chromosome myChromosome;
-	//std::cout << myChromosome.toString() << std::endl;
-
-	return 0;
+	// 201621 GPU
+	// cudaDeviceReset must be called before exiting in order for profiling and
+    // tracing tools such as Nsight and Visual Profiler to show complete traces.
+	cudaError_t cudaStatus = cudaDeviceReset();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaDeviceReset failed!");
+        return 1;
+    }
 }
 
-//cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size);
-//
-//__global__ void addKernel(int *c, const int *a, const int *b)
-//{
-//    int i = threadIdx.x;
-//    c[i] = a[i] + b[i];
-//}
-//
-//int main()
-//{
-//    const int arraySize = 5;
-//    const int a[arraySize] = { 1, 2, 3, 4, 5 };
-//    const int b[arraySize] = { 10, 20, 30, 40, 50 };
-//    int c[arraySize] = { 0 };
-//
-//    // Add vectors in parallel.
-//    cudaError_t cudaStatus = addWithCuda(c, a, b, arraySize);
-//    if (cudaStatus != cudaSuccess) {
-//        fprintf(stderr, "addWithCuda failed!");
-//        return 1;
-//    }
-//
-//    printf("{1,2,3,4,5} + {10,20,30,40,50} = {%d,%d,%d,%d,%d}\n",
-//        c[0], c[1], c[2], c[3], c[4]);
-//
-//    // cudaDeviceReset must be called before exiting in order for profiling and
-//    // tracing tools such as Nsight and Visual Profiler to show complete traces.
-//    cudaStatus = cudaDeviceReset();
-//    if (cudaStatus != cudaSuccess) {
-//        fprintf(stderr, "cudaDeviceReset failed!");
-//        return 1;
-//    }
-//
-//    return 0;
-//}
-//
-//// Helper function for using CUDA to add vectors in parallel.
-//cudaError_t addWithCuda(int *c, const int *a, const int *b, unsigned int size)
-//{
-//    int *dev_a = 0;
-//    int *dev_b = 0;
-//    int *dev_c = 0;
-//    cudaError_t cudaStatus;
-//
-//    // Choose which GPU to run on, change this on a multi-GPU system.
-//    cudaStatus = cudaSetDevice(0);
-//    if (cudaStatus != cudaSuccess) {
-//        fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
-//        goto Error;
-//    }
-//
-//    // Allocate GPU buffers for three vectors (two input, one output)    .
-//    cudaStatus = cudaMalloc((void**)&dev_c, size * sizeof(int));
-//    if (cudaStatus != cudaSuccess) {
-//        fprintf(stderr, "cudaMalloc failed!");
-//        goto Error;
-//    }
-//
-//    cudaStatus = cudaMalloc((void**)&dev_a, size * sizeof(int));
-//    if (cudaStatus != cudaSuccess) {
-//        fprintf(stderr, "cudaMalloc failed!");
-//        goto Error;
-//    }
-//
-//    cudaStatus = cudaMalloc((void**)&dev_b, size * sizeof(int));
-//    if (cudaStatus != cudaSuccess) {
-//        fprintf(stderr, "cudaMalloc failed!");
-//        goto Error;
-//    }
-//
-//    // Copy input vectors from host memory to GPU buffers.
-//    cudaStatus = cudaMemcpy(dev_a, a, size * sizeof(int), cudaMemcpyHostToDevice);
-//    if (cudaStatus != cudaSuccess) {
-//        fprintf(stderr, "cudaMemcpy failed!");
-//        goto Error;
-//    }
-//
-//    cudaStatus = cudaMemcpy(dev_b, b, size * sizeof(int), cudaMemcpyHostToDevice);
-//    if (cudaStatus != cudaSuccess) {
-//        fprintf(stderr, "cudaMemcpy failed!");
-//        goto Error;
-//    }
-//
-//    // Launch a kernel on the GPU with one thread for each element.
-//    addKernel<<<1, size>>>(dev_c, dev_a, dev_b);
-//
-//    // Check for any errors launching the kernel
-//    cudaStatus = cudaGetLastError();
-//    if (cudaStatus != cudaSuccess) {
-//        fprintf(stderr, "addKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
-//        goto Error;
-//    }
-//    
-//    // cudaDeviceSynchronize waits for the kernel to finish, and returns
-//    // any errors encountered during the launch.
-//    cudaStatus = cudaDeviceSynchronize();
-//    if (cudaStatus != cudaSuccess) {
-//        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
-//        goto Error;
-//    }
-//
-//    // Copy output vector from GPU buffer to host memory.
-//    cudaStatus = cudaMemcpy(c, dev_c, size * sizeof(int), cudaMemcpyDeviceToHost);
-//    if (cudaStatus != cudaSuccess) {
-//        fprintf(stderr, "cudaMemcpy failed!");
-//        goto Error;
-//    }
-//
-//Error:
-//    cudaFree(dev_c);
-//    cudaFree(dev_a);
-//    cudaFree(dev_b);
-//    
-//    return cudaStatus;
-//}
+void startCounter(double& PCFreq, __int64& CounterStart) {
+	/* A function to measure CPU time during any operation.
+	 * Call before the operation starts
+	 *
+	 * Parameters:
+	 *      PCFreq(double &):
+	 *          Referance to a double
+	 *		CounterStart(__int64):
+	 *          Referance to a __int64
+	 */
+	LARGE_INTEGER li;
+	if (!QueryPerformanceFrequency(&li))
+		std::cout << "QueryPerformanceFrequency failed!\n";
+
+	PCFreq = double(li.QuadPart) / 1000.0;
+
+	QueryPerformanceCounter(&li);
+	CounterStart = li.QuadPart;
+}
+double getCounter(double& PCFreq, __int64& CounterStart) {
+	/* A function to measure CPU time during any operation.
+	 * Call after the operation starts
+	 *
+	 * Parameters:
+	 *      PCFreq(double &):
+	 *          Referance to a double
+	 *		CounterStart(__int64):
+	 *          Referance to a __int64
+	 *
+	 * Returns:
+	 *		time_passed(double):
+	 *			time passed from the time counter has been initiated by
+	 *			startCounter() funciton call until getCounter() has been called.
+	 */
+	LARGE_INTEGER li;
+	QueryPerformanceCounter(&li);
+	return double(li.QuadPart - CounterStart) / PCFreq;
+}
+
+double experimentCPU(int repeat) {
+	/* A black-box function to handle CPU timing experiment over "repeat" times
+	 *
+	 * - Load image
+	 * - Start timer
+	 * - Find minimum and maximum
+	 * - Subract minimum pixel value from all pixels.
+	 * - Normalize the image by multiplying all pixels by a factor
+	 * - Stop timer
+	 * - Accumulate the result
+	 * - Go back to Start timer step if the operation not repeated "repeat" times
+	 * - Write a new image
+	 *
+	 * Parameters:
+	 *		repeat(int):
+	 *			operation repetition amount
+	 *      sFileName(char*):
+	 *          Source image path
+	 *		dFileName(char*):
+	 *			destination image path
+	 * Returns
+	 *		average_time(double):
+	 *			average time passed over all repetitions
+	 *
+	 */
+	double PCFreq = 0.0;
+	__int64 CounterStart = 0;
+	double cpu_elapsed_time = 0.0;
+	double average_time = 0.0;
+	int exp = 0;
+	int n = 32;
+	int printCount = (int)repeat / 10.0;
+
+	printf("\nTiming Experiment CPU");
+	Controller CANQueen = Controller::getControllerCPU(n);
+	CA* myCA1 = new CA(25);
+	myCA1->initCADevice();
+
+	//
+
+	while (exp <= repeat) {
+		if (exp % printCount == 0) {
+			printf("\nREPEAT: %d", exp);
+		}
+
+		startCounter(PCFreq, CounterStart);
+
+		// Do the operations
+		CANQueen.runFor_CPU(10);
+		//myCA1->runFor_CPU(10);
+		
+		cpu_elapsed_time = getCounter(PCFreq, CounterStart);
+		average_time += cpu_elapsed_time;
+		exp++;
+	}
+	//std::cout << myCA1->getActivity() << std::endl;
+	average_time /= exp;
+	printf("\nAverage Time for 1 step: %f", average_time);
+	// Cleaning
+	return average_time;
+}
+
+float experimentGPU(int repeat) {
+	/* A black-box function to handle GPU timing experiment over "repeat" times
+	 *
+	 * - Load image
+	 * - Check the num_threads and blockWidth parameters
+	 * - Set device pointers and do required memory allocation
+	 * - Copy image from host to device
+	 * - Start timer
+	 * - Find minimum and maximum
+	 * - Copy minimum and maximum back to host
+	 * - Find optimum scaling parameters
+	 * - Subract minimum pixel value from all pixels.
+	 * - Normalize the image by multiplying all pixels by a factor
+	 * - Stop timer
+	 * - Copy image from device to host
+	 * - Write a new image
+	 *
+	 * Parameters:
+	 *		repeat(int):
+	 *			operation repetition amount
+	 *		num_threads(unsigned int):
+	 *			Limited to 1024
+	 *		blockWidth(unsigned int):
+	 *			Limited to image width
+	 *      sFileName(char*):
+	 *          Source image path
+	 *		dFileName(char*):
+	 *			destination image path
+	 * Returns
+	 *		average_time(float):
+	 *			average time passed over all repetitions
+	 *
+	 */
+
+	float average_time = 0.0f;
+	int exp = 0;
+	int printCount = (int)repeat / 10.0;
+	int n = 32;
+
+	Controller CANQueen = Controller::getControllerGPU(n);
+
+	CA* myCA1 = new CA(25);
+	myCA1->initCADevice();
+
+	printf("\nTiming Experiment GPU");
+	printf("\nTotal Repetition: \t%d\n\n", repeat);
+
+	// Timing variables
+	float gpu_elapsed_time = 0.0;
+	cudaEvent_t gpu_start, gpu_stop;
+
+	while (exp <= repeat) {
+		if (exp % printCount == 0) {
+			printf("\nREPEAT: %d", exp);
+		}
+		cudaEventCreate(&gpu_start);
+		cudaEventCreate(&gpu_stop);
+		cudaEventRecord(gpu_start, 0);
+
+		// Do the operations
+		CANQueen.runFor_GPU(10);
+		//myCA1->runFor_GPU(10);
+
+		cudaThreadSynchronize();
+
+		// Time record and copy data to host
+		cudaEventRecord(gpu_stop, 0);
+		cudaEventSynchronize(gpu_stop);
+		cudaEventElapsedTime(&gpu_elapsed_time, gpu_start, gpu_stop);
+		average_time += gpu_elapsed_time;
+		cudaEventDestroy(gpu_start);
+		cudaEventDestroy(gpu_stop);
+		exp++;
+	}
+
+	average_time /= exp;
+	printf("\nAverage Time for 1 step: %f", average_time);
+	//Clean up
+	//delete[] h_dst;
+
+	// Device parameters
+	//cudaFree(d_src);
+
+	return average_time;
+}
+

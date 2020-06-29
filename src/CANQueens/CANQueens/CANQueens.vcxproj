@@ -51,10 +51,13 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cudart_static.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;cudadevrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CudaCompile>
       <TargetMachinePlatform>64</TargetMachinePlatform>
+      <CodeGeneration>compute_50,sm_50</CodeGeneration>
+      <GenerateRelocatableDeviceCode>true</GenerateRelocatableDeviceCode>
+      <CudaRuntime>Shared</CudaRuntime>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -79,20 +82,22 @@
   <ItemGroup>
     <CudaCompile Include="Board.cu" />
     <CudaCompile Include="CA.cu" />
-    <CudaCompile Include="Chromosome.cu" />
     <CudaCompile Include="Explore.cu" />
+    <CudaCompile Include="Controller.cu" />
     <CudaCompile Include="FLIF.cu" />
     <CudaCompile Include="main.cu" />
     <CudaCompile Include="Memory.cu" />
+    <CudaCompile Include="Synapse.cu" />
     <CudaCompile Include="Value.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Board.cuh" />
     <ClInclude Include="CA.cuh" />
-    <ClInclude Include="Chromosome.cuh" />
     <ClInclude Include="Explore.cuh" />
+    <ClInclude Include="Controller.cuh" />
     <ClInclude Include="FLIF.cuh" />
     <ClInclude Include="Memory.cuh" />
+    <ClInclude Include="Synapse.cuh" />
     <ClInclude Include="Value.cuh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
